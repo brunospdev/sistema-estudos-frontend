@@ -1,0 +1,101 @@
+.rodape-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 28px;
+  pointer-events: none;
+}
+
+.pill-pendentes {
+  background-color: #E8872A;
+  border-radius: 24px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: all;
+  cursor: default;
+  box-shadow: 0 4px 14px rgba(232, 135, 42, 0.4);
+  animation: slideUpIn 0.3s ease;
+}
+
+.pill-pendentes-icon {
+  font-size: 16px;
+}
+
+.pill-pendentes-texto {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.pill-acoes {
+  background: #ffffff;
+  border-radius: 40px;
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  pointer-events: all;
+}
+
+.pill-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.15s;
+  color: #6B7280;
+}
+
+.pill-btn:hover {
+  background-color: #F3F4F6;
+}
+
+.pill-btn-mais {
+  width: 44px;
+  height: 44px;
+  background-color: #1A9E9E;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(26, 158, 158, 0.4);
+  transition: background-color 0.2s, transform 0.1s;
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 300;
+  padding-bottom: 2px;
+}
+
+.pill-btn-mais:hover {
+  background-color: #178a8a;
+}
+
+.pill-btn-mais:active {
+  transform: scale(0.94);
+}
+
+.pill-btn-engrenagem {
+  font-size: 22px;
+  padding: 8px;
+}
+
+@keyframes slideUpIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
