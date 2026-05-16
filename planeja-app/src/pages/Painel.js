@@ -3,6 +3,7 @@ import api from '../services/api';
 import CardDisciplina from '../components/CardDisciplina';
 import ModalDisciplina from '../components/ModalDisciplina';
 import Rodape from '../components/Rodape';
+import LogoSvg from '../assets/logo.svg';
 import './Painel.css';
 
 const DIAS = ['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'];
@@ -22,42 +23,7 @@ function nomeUsuario() {
   }
 }
 
-/* Dados locais de demonstração (substituídos por dados reais quando a API responder) */
-const DEMO = [
-  {
-    id: 1,
-    nome: 'Matemática',
-    topicos: [
-      { id: 1, nome: 'Funções do 2º grau', concluido: true },
-      { id: 2, nome: 'Trigonometria', concluido: false },
-      { id: 3, nome: 'Geometria Plana', concluido: false },
-    ],
-  },
-  {
-    id: 2,
-    nome: 'Física',
-    topicos: [
-      { id: 4, nome: 'Cinemática', concluido: true },
-      { id: 5, nome: 'Dinâmica', concluido: true },
-    ],
-  },
-  {
-    id: 3,
-    nome: 'Português',
-    topicos: [
-      { id: 6, nome: 'Análise Sintática', concluido: false },
-    ],
-  },
-  {
-    id: 4,
-    nome: 'História',
-    topicos: [
-      { id: 7, nome: 'Revolução Industrial', concluido: true },
-      { id: 8, nome: 'Brasil Colônia', concluido: true },
-      { id: 9, nome: 'Era Vargas', concluido: true },
-    ],
-  },
-];
+const DEMO = [];
 
 export default function Painel() {
   const [disciplinas, setDisciplinas] = useState(DEMO);
@@ -72,7 +38,7 @@ export default function Painel() {
       const { data } = await api.get('/disciplinas');
       setDisciplinas(data);
     } catch {
-      /* mantém dados demo se API indisponível */
+      /* mantém vazio se API indisponível */
     } finally {
       setCarregando(false);
     }
@@ -87,7 +53,6 @@ export default function Painel() {
       const { data } = await api.post('/disciplinas', { nome });
       setDisciplinas((prev) => [...prev, { ...data, topicos: data.topicos || [] }]);
     } catch {
-      /* fallback local */
       const novaId = Date.now();
       setDisciplinas((prev) => [...prev, { id: novaId, nome, topicos: [] }]);
     }
@@ -143,50 +108,51 @@ export default function Painel() {
 
   return (
     <div className="painel-page">
-      <header className="painel-header">
-        <div className="painel-header-info">
-          <span className="painel-data">{dataFormatada()}</span>
-          <span className="painel-saudacao">Olá, {nomeUsuario()}</span>
-        </div>
-        <div className="painel-logo">
-          <span className="logo-planeja">PLANEJA</span>
-          <span className="logo-plus">+</span>
-        </div>
-      </header>
+      <div className="painel-inner">
+        <header className="painel-header">
+          <div className="painel-header-info">
+            <span className="painel-data">{dataFormatada()}</span>
+            <span className="painel-saudacao">Olá, {nomeUsuario()}</span>
+          </div>
+          <div className="painel-logo">
+            <img src={LogoSvg} alt="Planeja+" />
+          </div>
+        </header>
 
-      <div className="painel-section-header">
-        <span className="painel-section-titulo">Suas Disciplinas</span>
-        <span className="painel-section-count">
-          {disciplinas.length} {disciplinas.length === 1 ? 'disciplina' : 'disciplinas'}
-        </span>
-      </div>
+        <div className="painel-section-header">
+          <span className="painel-section-titulo">Suas Disciplinas</span>
+          <span className="painel-section-count">
+            {disciplinas.length} {disciplinas.length === 1 ? 'disciplina' : 'disciplinas'}
+          </span>
+        </div>
 
-      {carregando ? (
-        <div className="painel-loading">Carregando...</div>
-      ) : erro ? (
-        <div className="painel-erro">{erro}</div>
-      ) : (
-        <div className="painel-grid">
-          {disciplinas.length === 0 ? (
-            <div className="painel-vazio">
-              <div className="painel-vazio-icone">📚</div>
-              <div className="painel-vazio-titulo">Nenhuma disciplina ainda</div>
-              <div className="painel-vazio-desc">
-                Toque no botão + para adicionar sua primeira disciplina
+        {carregando ? (
+          <div className="painel-loading">Carregando...</div>
+        ) : erro ? (
+          <div className="painel-erro">{erro}</div>
+        ) : (
+          <div className="painel-grid">
+            {disciplinas.length === 0 ? (
+              <div className="painel-vazio">
+                <div className="painel-vazio-icone">📚</div>
+                <div className="painel-vazio-titulo">Nenhuma disciplina ainda</div>
+                <div className="painel-vazio-desc">
+                  Toque no botão + para adicionar sua primeira disciplina
+                </div>
               </div>
-            </div>
-          ) : (
-            disciplinas.map((d) => (
-              <CardDisciplina
-                key={d.id}
-                disciplina={d}
-                onToggleTopico={handleToggleTopico}
-                onAdicionarTopico={handleAdicionarTopico}
-              />
-            ))
-          )}
-        </div>
-      )}
+            ) : (
+              disciplinas.map((d) => (
+                <CardDisciplina
+                  key={d.id}
+                  disciplina={d}
+                  onToggleTopico={handleToggleTopico}
+                  onAdicionarTopico={handleAdicionarTopico}
+                />
+              ))
+            )}
+          </div>
+        )}
+      </div>
 
       <ModalDisciplina
         aberto={modalAberto}

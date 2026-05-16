@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import './Login.css';
+import LogoSvg from '../assets/logo.svg';
 
 function Logo() {
   return (
     <div className="login-logo">
-      <span className="login-logo-text">
-        <span className="logo-planeja">PLANEJA</span>
-        <span className="logo-plus">+</span>
-      </span>
+      <img src={LogoSvg} alt="Planeja+" className="logo-svg" />
     </div>
   );
 }

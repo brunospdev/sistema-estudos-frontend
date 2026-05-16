@@ -1,6 +1,6 @@
 .perfil-page {
   min-height: 100vh;
-  background-color: #ffffff;
+  background: transparent;
   padding: 28px 24px 48px;
 }
 
@@ -14,7 +14,7 @@
   border: none;
   cursor: pointer;
   font-size: 14px;
-  color: #6B7280;
+  color: var(--color-gray-light);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -24,7 +24,7 @@
 }
 
 .perfil-voltar:hover {
-  color: #1A1A2E;
+  color: var(--color-text-main);
 }
 
 .perfil-topo {
@@ -34,17 +34,28 @@
   margin-bottom: 24px;
 }
 
+.perfil-logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.perfil-logo img {
+  width: 160px;
+  height: auto;
+}
+
 .perfil-titulo {
   font-size: 18px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #1A1A2E;
+  color: var(--color-text-main);
 }
 
 .btn-sair {
   background-color: #FFDAB3;
-  color: #E8872A;
+  color: var(--color-orange);
   border: none;
   border-radius: 20px;
   padding: 8px 18px;
@@ -59,7 +70,7 @@
 }
 
 .perfil-card-avatar {
-  background: #fff;
+  background: var(--color-white);
   border-radius: 16px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   padding: 24px;
@@ -79,7 +90,7 @@
   justify-content: center;
   flex-shrink: 0;
   font-size: 30px;
-  color: #9CA3AF;
+  color: var(--color-gray-light);
   overflow: hidden;
 }
 
@@ -93,7 +104,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #1A9E9E;
+  color: var(--color-primary);
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
@@ -124,30 +135,30 @@
   font-weight: 700;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: #6B7280;
+  color: var(--color-gray-dark);
 }
 
 .perfil-form .form-group input {
   height: 48px;
   padding: 0 16px;
-  border: 1.5px solid #E0E0E0;
+  border: 1.5px solid var(--color-border);
   border-radius: 10px;
   font-size: 15px;
-  color: #1A1A2E;
+  color: var(--color-text-main);
   outline: none;
   transition: border-color 0.2s;
-  background: #fff;
+  background: var(--color-white);
 }
 
 .perfil-form .form-group input:focus {
-  border-color: #1A9E9E;
+  border-color: var(--color-primary);
 }
 
 .btn-salvar {
   width: 100%;
   height: 48px;
-  background-color: #1A9E9E;
-  color: #ffffff;
+  background-color: var(--color-primary);
+  color: var(--color-white);
   border: none;
   border-radius: 10px;
   font-size: 15px;
@@ -157,7 +168,7 @@
 }
 
 .btn-salvar:hover {
-  background-color: #178a8a;
+  background-color: #025f70;
 }
 
 .btn-salvar:active {
@@ -169,7 +180,6 @@
   cursor: not-allowed;
 }
 
-/* Notificações */
 .perfil-secao {
   margin-top: 28px;
 }
@@ -177,7 +187,7 @@
 .perfil-secao-titulo {
   font-size: 15px;
   font-weight: 700;
-  color: #1A1A2E;
+  color: var(--color-text-main);
   margin-bottom: 14px;
 }
 
@@ -186,7 +196,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  background: #fff;
+  background: var(--color-white);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
@@ -196,7 +206,6 @@
   color: #374151;
 }
 
-/* Toggle switch */
 .toggle-switch {
   position: relative;
   width: 46px;
@@ -226,21 +235,20 @@
   width: 20px;
   left: 3px;
   top: 3px;
-  background-color: #fff;
+  background-color: var(--color-white);
   border-radius: 50%;
   transition: transform 0.2s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-switch input:checked + .toggle-slider {
-  background-color: #4CAF50;
+  background-color: var(--color-green);
 }
 
 .toggle-switch input:checked + .toggle-slider::before {
   transform: translateX(20px);
 }
 
-/* Privacidade / Excluir */
 .card-privacidade {
   border: 1.5px solid #FFCDD2;
   border-radius: 12px;
@@ -249,7 +257,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: #fff;
+  background: var(--color-white);
 }
 
 .privacidade-info {
@@ -259,13 +267,13 @@
 .privacidade-titulo {
   font-size: 14px;
   font-weight: 700;
-  color: #1A1A2E;
+  color: var(--color-text-main);
   margin-bottom: 2px;
 }
 
 .privacidade-desc {
   font-size: 12px;
-  color: #6B7280;
+  color: var(--color-gray-light);
   line-height: 1.4;
 }
 
@@ -302,6 +310,6 @@
 }
 
 .perfil-feedback.erro {
-  background: #FFEAEA;
-  color: #CC0000;
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
 }

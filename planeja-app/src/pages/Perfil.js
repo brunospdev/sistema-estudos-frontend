@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import LogoSvg from '../assets/logo.svg';
 import './Perfil.css';
 
 function dadosIniciais() {
@@ -70,6 +71,10 @@ export default function Perfil() {
   return (
     <div className="perfil-page">
       <div className="perfil-inner">
+        <div className="perfil-logo">
+          <img src={LogoSvg} alt="Planeja+" />
+        </div>
+
         <button className="perfil-voltar" onClick={() => navigate('/')}>
           ← Voltar
         </button>
@@ -122,7 +127,6 @@ export default function Perfil() {
           </button>
         </form>
 
-        {/* Notificações */}
         <div className="perfil-secao">
           <div className="perfil-secao-titulo">Notificações</div>
           <div className="notif-row">
@@ -138,7 +142,6 @@ export default function Perfil() {
           </div>
         </div>
 
-        {/* Privacidade */}
         <div className="perfil-secao">
           <div className="perfil-secao-titulo">Privacidade</div>
           <div className="card-privacidade">

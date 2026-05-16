@@ -4,10 +4,28 @@
   padding: 0;
 }
 
+:root {
+  --color-primary: #027A8F;
+  --color-gray-light: #848484;
+  --color-gray-dark: #5C6067;
+  --color-orange: #F38F2B;
+  --color-green: #1DC81D;
+  --color-text-main: #1A1A2E;
+  --color-bg-gradient-start: #FFFFFF;
+  --color-bg-gradient-end: #DDFAFF;
+  --color-bg-page: #F0F2F5;
+  --color-white: #FFFFFF;
+  --color-border: #E0E0E0;
+  --color-error-bg: #FFEAEA;
+  --color-error-border: #FFCCCC;
+  --color-error-text: #CC0000;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #F0F2F5;
+  background: linear-gradient(to right, var(--color-bg-gradient-start), var(--color-bg-gradient-end));
+  min-height: 100vh;
 }

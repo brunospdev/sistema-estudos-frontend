@@ -1,14 +1,20 @@
 .painel-page {
   min-height: 100vh;
-  background-color: #F0F2F5;
+  background: transparent;
   padding: 0 0 160px;
+}
+
+.painel-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 32px;
 }
 
 .painel-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 28px 24px 20px;
+  padding: 28px 0 20px;
 }
 
 .painel-header-info {
@@ -20,7 +26,7 @@
 .painel-data {
   font-size: 12px;
   font-weight: 500;
-  color: #6B7280;
+  color: var(--color-gray-light);
   text-transform: capitalize;
   letter-spacing: 0.3px;
 }
@@ -28,31 +34,25 @@
 .painel-saudacao {
   font-size: 24px;
   font-weight: 700;
-  color: #1A1A2E;
+  color: var(--color-text-main);
   line-height: 1.2;
 }
 
 .painel-logo {
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: -0.5px;
-  line-height: 1;
-  margin-top: 4px;
+  display: flex;
+  align-items: center;
 }
 
-.painel-logo .logo-planeja {
-  color: #1A9E9E;
-}
-
-.painel-logo .logo-plus {
-  color: #4CAF50;
+.painel-logo img {
+  width: 130px;
+  height: auto;
 }
 
 .painel-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px 14px;
+  padding: 0 0 14px;
 }
 
 .painel-section-titulo {
@@ -60,12 +60,12 @@
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #6B7280;
+  color: var(--color-gray-dark);
 }
 
 .painel-section-count {
   font-size: 12px;
-  color: #9CA3AF;
+  color: var(--color-gray-light);
   font-weight: 500;
 }
 
@@ -73,10 +73,12 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  padding: 0 16px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
+  .painel-inner {
+    padding: 0 16px;
+  }
   .painel-grid {
     grid-template-columns: 1fr;
   }
@@ -86,7 +88,7 @@
   grid-column: 1 / -1;
   text-align: center;
   padding: 48px 24px;
-  color: #9CA3AF;
+  color: var(--color-gray-light);
 }
 
 .painel-vazio-icone {
@@ -97,13 +99,13 @@
 .painel-vazio-titulo {
   font-size: 16px;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--color-gray-dark);
   margin-bottom: 6px;
 }
 
 .painel-vazio-desc {
   font-size: 13px;
-  color: #9CA3AF;
+  color: var(--color-gray-light);
 }
 
 .painel-loading {
@@ -111,17 +113,16 @@
   align-items: center;
   justify-content: center;
   padding: 60px 24px;
-  color: #9CA3AF;
+  color: var(--color-gray-light);
   font-size: 14px;
 }
 
 .painel-erro {
-  margin: 20px 24px;
   padding: 14px 18px;
-  background: #FFEAEA;
-  border: 1px solid #FFCCCC;
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
   border-radius: 10px;
-  color: #CC0000;
+  color: var(--color-error-text);
   font-size: 13px;
   text-align: center;
 }

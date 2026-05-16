@@ -6,43 +6,46 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding-bottom: 28px;
   pointer-events: none;
 }
 
+/* PILL PENDENTES */
 .pill-pendentes {
-  background-color: #E8872A;
-  border-radius: 24px;
-  padding: 10px 20px;
+  background-color: var(--color-orange);
+  border-radius: 30px;
+  padding: 10px 22px;
   display: flex;
   align-items: center;
   gap: 8px;
   pointer-events: all;
   cursor: default;
-  box-shadow: 0 4px 14px rgba(232, 135, 42, 0.4);
+  box-shadow: 0 4px 16px rgba(243, 143, 43, 0.45);
   animation: slideUpIn 0.3s ease;
 }
 
 .pill-pendentes-icon {
   font-size: 16px;
+  color: var(--color-white);
 }
 
 .pill-pendentes-texto {
   font-size: 14px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--color-white);
   white-space: nowrap;
 }
 
+/* PILL AÇÕES */
 .pill-acoes {
-  background: #ffffff;
-  border-radius: 40px;
-  padding: 10px 28px;
+  background: var(--color-white);
+  border-radius: 50px;
+  padding: 8px 24px;
   display: flex;
   align-items: center;
-  gap: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  gap: 18px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.13);
   pointer-events: all;
 }
 
@@ -56,7 +59,8 @@
   padding: 8px;
   border-radius: 50%;
   transition: background-color 0.15s;
-  color: #6B7280;
+  color: var(--color-gray-dark);
+  font-size: 20px;
 }
 
 .pill-btn:hover {
@@ -64,26 +68,26 @@
 }
 
 .pill-btn-mais {
-  width: 44px;
-  height: 44px;
-  background-color: #1A9E9E;
+  width: 46px;
+  height: 46px;
+  background-color: var(--color-primary);
   border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(26, 158, 158, 0.4);
+  box-shadow: 0 3px 12px rgba(2, 122, 143, 0.4);
   transition: background-color 0.2s, transform 0.1s;
-  color: #fff;
-  font-size: 26px;
+  color: var(--color-white);
+  font-size: 28px;
   line-height: 1;
   font-weight: 300;
   padding-bottom: 2px;
 }
 
 .pill-btn-mais:hover {
-  background-color: #178a8a;
+  background-color: #025f70;
 }
 
 .pill-btn-mais:active {
@@ -91,8 +95,7 @@
 }
 
 .pill-btn-engrenagem {
-  font-size: 22px;
-  padding: 8px;
+  font-size: 20px;
 }
 
 @keyframes slideUpIn {
