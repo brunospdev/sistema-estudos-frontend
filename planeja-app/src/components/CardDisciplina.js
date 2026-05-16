@@ -8,7 +8,7 @@ function statusBullet(concluidos, total) {
   return 'pendente';
 }
 
-export default function CardDisciplina({ disciplina, onToggleTopico, onAdicionarTopico }) {
+export default function CardDisciplina({ disciplina, onToggleTopico, onAdicionarTopico, onRemoverDisciplina }) {
   const { id, nome, topicos = [] } = disciplina;
   const total = topicos.length;
   const concluidos = topicos.filter((t) => t.concluido).length;
@@ -20,9 +20,15 @@ export default function CardDisciplina({ disciplina, onToggleTopico, onAdicionar
       <div className="card-header">
         <span className={`card-bullet ${status}`} />
         <span className="card-nome">{nome}</span>
-        <span className="card-badge">
-          {concluidos}/{total}
-        </span>
+        <span className="card-badge">{concluidos}/{total}</span>
+        <button
+          className="card-remover"
+          onClick={() => onRemoverDisciplina && onRemoverDisciplina(id)}
+          aria-label="Remover disciplina"
+          title="Remover disciplina"
+        >
+          ×
+        </button>
       </div>
 
       <hr className="card-divisor" />

@@ -23,13 +23,12 @@ function nomeUsuario() {
   }
 }
 
-const DEMO = [];
-
 export default function Painel() {
-  const [disciplinas, setDisciplinas] = useState(DEMO);
+  const [disciplinas, setDisciplinas] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
-  const [modalAberto, setModalAberto] = useState(false);
+  const [modalDisciplina, setModalDisciplina] = useState(false);
+  const [modalTopico, setModalTopico] = useState({ aberto: false, disciplinaId: null });
 
   const carregarDisciplinas = useCallback(async () => {
     setCarregando(true);
@@ -53,8 +52,17 @@ export default function Painel() {
       const { data } = await api.post('/disciplinas', { nome });
       setDisciplinas((prev) => [...prev, { ...data, topicos: data.topicos || [] }]);
     } catch {
-      const novaId = Date.now();
-      setDisciplinas((prev) => [...prev, { id: novaId, nome, topicos: [] }]);
+      setDisciplinas((prev) => [...prev, { id: Date.now(), nome, topicos: [] }]);
+    }
+  }
+
+  async function handleRemoverDisciplina(disciplinaId) {
+    if (!window.confirm('Remover esta disciplina e todos os seus tópicos?')) return;
+    setDisciplinas((prev) => prev.filter((d) => d.id !== disciplinaId));
+    try {
+      await api.delete(`/disciplinas/${disciplinaId}`);
+    } catch {
+      /* já removeu localmente */
     }
   }
 
@@ -72,16 +80,17 @@ export default function Painel() {
     );
     try {
       await api.patch(`/disciplinas/${disciplinaId}/topicos/${topicoId}/toggle`);
-    } catch {
-      /* rollback se necessário */
-    }
+    } catch { /* silencioso */ }
   }
 
-  async function handleAdicionarTopico(disciplinaId) {
-    const nome = window.prompt('Nome do tópico:');
-    if (!nome?.trim()) return;
+  function handleAbrirModalTopico(disciplinaId) {
+    setModalTopico({ aberto: true, disciplinaId });
+  }
+
+  async function handleAdicionarTopico(nome) {
+    const { disciplinaId } = modalTopico;
     try {
-      const { data } = await api.post(`/disciplinas/${disciplinaId}/topicos`, { nome: nome.trim() });
+      const { data } = await api.post(`/disciplinas/${disciplinaId}/topicos`, { nome });
       setDisciplinas((prev) =>
         prev.map((d) =>
           d.id === disciplinaId
@@ -90,11 +99,10 @@ export default function Painel() {
         )
       );
     } catch {
-      const novoId = Date.now();
       setDisciplinas((prev) =>
         prev.map((d) =>
           d.id === disciplinaId
-            ? { ...d, topicos: [...(d.topicos || []), { id: novoId, nome: nome.trim(), concluido: false }] }
+            ? { ...d, topicos: [...(d.topicos || []), { id: Date.now(), nome, concluido: false }] }
             : d
         )
       );
@@ -146,7 +154,8 @@ export default function Painel() {
                   key={d.id}
                   disciplina={d}
                   onToggleTopico={handleToggleTopico}
-                  onAdicionarTopico={handleAdicionarTopico}
+                  onAdicionarTopico={handleAbrirModalTopico}
+                  onRemoverDisciplina={handleRemoverDisciplina}
                 />
               ))
             )}
@@ -154,13 +163,23 @@ export default function Painel() {
         )}
       </div>
 
+      {/* Modal nova disciplina */}
       <ModalDisciplina
-        aberto={modalAberto}
-        onFechar={() => setModalAberto(false)}
+        aberto={modalDisciplina}
+        onFechar={() => setModalDisciplina(false)}
         onAdicionar={handleAdicionarDisciplina}
+        modo="disciplina"
       />
 
-      <Rodape pendentes={pendentes} onNovaDisciplina={() => setModalAberto(true)} />
+      {/* Modal novo tópico */}
+      <ModalDisciplina
+        aberto={modalTopico.aberto}
+        onFechar={() => setModalTopico({ aberto: false, disciplinaId: null })}
+        onAdicionar={handleAdicionarTopico}
+        modo="topico"
+      />
+
+      <Rodape pendentes={pendentes} onNovaDisciplina={() => setModalDisciplina(true)} />
     </div>
   );
 }

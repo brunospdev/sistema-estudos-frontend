@@ -18,21 +18,21 @@ export default function Rodape({ pendentes, onNovaDisciplina }) {
 
       <div className="pill-acoes">
         <button
-          className="pill-btn pill-btn-engrenagem"
-          onClick={() => navigate('/perfil')}
-          aria-label="Configurações / Perfil"
-          title="Perfil"
-        >
-          ⚙
-        </button>
-
-        <button
           className="pill-btn-mais"
           onClick={onNovaDisciplina}
           aria-label="Nova disciplina"
           title="Nova disciplina"
         >
           +
+        </button>
+
+        <button
+          className="pill-btn pill-btn-engrenagem"
+          onClick={() => navigate('/perfil')}
+          aria-label="Configurações / Perfil"
+          title="Perfil"
+        >
+          ⚙
         </button>
       </div>
     </div>

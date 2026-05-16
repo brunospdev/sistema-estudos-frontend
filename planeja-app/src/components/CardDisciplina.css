@@ -154,3 +154,22 @@
 .topico-add:hover .topico-add-icon {
   color: var(--color-primary);
 }
+
+/* Botão remover disciplina */
+.card-remover {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--color-gray-light);
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.2s, background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.card-remover:hover {
+  color: var(--color-error-text, #CC0000);
+  background-color: #FFEAEA;
+}
