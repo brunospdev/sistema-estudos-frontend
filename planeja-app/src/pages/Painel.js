@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import CardDisciplina from '../components/CardDisciplina';
 import ModalDisciplina from '../components/ModalDisciplina';
+import ModalPendentes from '../components/ModalPendentes';
 import Rodape from '../components/Rodape';
 import LogoSvg from '../assets/logo.svg';
 import './Painel.css';
@@ -29,6 +30,7 @@ export default function Painel() {
   const [erro, setErro] = useState('');
   const [modalDisciplina, setModalDisciplina] = useState(false);
   const [modalTopico, setModalTopico] = useState({ aberto: false, disciplinaId: null });
+  const [modalPendentes, setModalPendentes] = useState(false);
 
   const carregarDisciplinas = useCallback(async () => {
     setCarregando(true);
@@ -61,9 +63,7 @@ export default function Painel() {
     setDisciplinas((prev) => prev.filter((d) => d.id !== disciplinaId));
     try {
       await api.delete(`/disciplinas/${disciplinaId}`);
-    } catch {
-      /* já removeu localmente */
-    }
+    } catch { /* já removeu localmente */ }
   }
 
   async function handleToggleTopico(disciplinaId, topicoId) {
@@ -149,10 +149,11 @@ export default function Painel() {
                 </div>
               </div>
             ) : (
-              disciplinas.map((d) => (
+              disciplinas.map((d, index) => (
                 <CardDisciplina
                   key={d.id}
                   disciplina={d}
+                  index={index}
                   onToggleTopico={handleToggleTopico}
                   onAdicionarTopico={handleAbrirModalTopico}
                   onRemoverDisciplina={handleRemoverDisciplina}
@@ -163,7 +164,6 @@ export default function Painel() {
         )}
       </div>
 
-      {/* Modal nova disciplina */}
       <ModalDisciplina
         aberto={modalDisciplina}
         onFechar={() => setModalDisciplina(false)}
@@ -171,7 +171,6 @@ export default function Painel() {
         modo="disciplina"
       />
 
-      {/* Modal novo tópico */}
       <ModalDisciplina
         aberto={modalTopico.aberto}
         onFechar={() => setModalTopico({ aberto: false, disciplinaId: null })}
@@ -179,7 +178,17 @@ export default function Painel() {
         modo="topico"
       />
 
-      <Rodape pendentes={pendentes} onNovaDisciplina={() => setModalDisciplina(true)} />
+      <ModalPendentes
+        aberto={modalPendentes}
+        onFechar={() => setModalPendentes(false)}
+        disciplinas={disciplinas}
+      />
+
+      <Rodape
+        pendentes={pendentes}
+        onNovaDisciplina={() => setModalDisciplina(true)}
+        onVerPendentes={() => setModalPendentes(true)}
+      />
     </div>
   );
 }

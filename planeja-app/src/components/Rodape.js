@@ -2,18 +2,18 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Rodape.css';
 
-export default function Rodape({ pendentes, onNovaDisciplina }) {
+export default function Rodape({ pendentes, onNovaDisciplina, onVerPendentes }) {
   const navigate = useNavigate();
 
   return (
     <div className="rodape-wrapper">
       {pendentes > 0 && (
-        <div className="pill-pendentes">
+        <button className="pill-pendentes" onClick={onVerPendentes}>
           <span className="pill-pendentes-icon">⚙</span>
           <span className="pill-pendentes-texto">
             {pendentes} {pendentes === 1 ? 'pendente' : 'pendentes'}
           </span>
-        </div>
+        </button>
       )}
 
       <div className="pill-acoes">
@@ -25,7 +25,6 @@ export default function Rodape({ pendentes, onNovaDisciplina }) {
         >
           +
         </button>
-
         <button
           className="pill-btn pill-btn-engrenagem"
           onClick={() => navigate('/perfil')}

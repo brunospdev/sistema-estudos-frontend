@@ -31,9 +31,7 @@ export default function Perfil() {
         setEmail(data.email || '');
         setNotificacoes(data.notificacoes ?? true);
         localStorage.setItem('user', JSON.stringify(data));
-      } catch {
-        /* usa dados do localStorage */
-      }
+      } catch { /* usa localStorage */ }
     }
     carregarPerfil();
   }, []);
@@ -80,52 +78,48 @@ export default function Perfil() {
         </button>
 
         <div className="perfil-topo">
-          <span className="perfil-titulo">Perfil</span>
-          <button className="btn-sair" onClick={handleSair}>
-            Sair da Conta
-          </button>
+          <span className="perfil-titulo">PERFIL</span>
+          <button className="btn-sair" onClick={handleSair}>Sair da Conta</button>
         </div>
 
-        <div className="perfil-card-avatar">
-          <div className="avatar-circulo">
-            <span>👤</span>
+        <div className="perfil-card">
+          <div className="perfil-avatar-row">
+            <div className="avatar-circulo">👤</div>
+            <button className="btn-alterar-foto">Alterar Foto</button>
           </div>
-          <button className="btn-alterar-foto" onClick={() => {}}>
-            Alterar Foto
-          </button>
+
+          <form className="perfil-form" onSubmit={handleSalvar} noValidate>
+            <div className="form-group">
+              <label htmlFor="perfil-nome">NOME COMPLETO</label>
+              <input
+                id="perfil-nome"
+                type="text"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                placeholder="Seu nome completo"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="perfil-email">EMAIL</label>
+              <input
+                id="perfil-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+              />
+            </div>
+
+            {feedback && (
+              <div className={`perfil-feedback ${feedback.tipo}`}>{feedback.msg}</div>
+            )}
+
+            <button type="submit" className="btn-salvar" disabled={carregando}>
+              {carregando ? 'Salvando...' : 'Salvar'}
+            </button>
+          </form>
         </div>
-
-        <form className="perfil-form" onSubmit={handleSalvar} noValidate>
-          <div className="form-group">
-            <label htmlFor="perfil-nome">NOME COMPLETO</label>
-            <input
-              id="perfil-nome"
-              type="text"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              placeholder="Seu nome completo"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="perfil-email">EMAIL</label>
-            <input
-              id="perfil-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-            />
-          </div>
-
-          {feedback && (
-            <div className={`perfil-feedback ${feedback.tipo}`}>{feedback.msg}</div>
-          )}
-
-          <button type="submit" className="btn-salvar" disabled={carregando}>
-            {carregando ? 'Salvando...' : 'Salvar'}
-          </button>
-        </form>
 
         <div className="perfil-secao">
           <div className="perfil-secao-titulo">Notificações</div>
@@ -147,13 +141,9 @@ export default function Perfil() {
           <div className="card-privacidade">
             <div className="privacidade-info">
               <div className="privacidade-titulo">Excluir conta</div>
-              <div className="privacidade-desc">
-                Remover permanentemente sua conta e dados
-              </div>
+              <div className="privacidade-desc">Remover permanentemente sua conta e dados</div>
             </div>
-            <button className="btn-excluir" onClick={handleExcluir}>
-              Excluir
-            </button>
+            <button className="btn-excluir" onClick={handleExcluir}>Excluir</button>
           </div>
         </div>
       </div>

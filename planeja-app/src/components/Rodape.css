@@ -14,13 +14,15 @@
 /* PILL PENDENTES */
 .pill-pendentes {
   background-color: var(--color-orange);
+  border: none;
+  outline: none;
   border-radius: 30px;
   padding: 10px 22px;
   display: flex;
   align-items: center;
   gap: 8px;
   pointer-events: all;
-  cursor: default;
+  cursor: pointer;
   box-shadow: 0 4px 16px rgba(243, 143, 43, 0.45);
   animation: slideUpIn 0.3s ease;
 }
