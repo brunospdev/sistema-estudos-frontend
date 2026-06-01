@@ -66,7 +66,11 @@ export default function CardDisciplina({ disciplina, index = 0, onToggleTopico, 
           className="topico-add"
           onClick={() => onAdicionarTopico && onAdicionarTopico(id)}
         >
-          <span className="topico-add-icon">⊞</span>
+          <span className="topico-add-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </span>
           Adicionar Tópico
         </button>
       </div>

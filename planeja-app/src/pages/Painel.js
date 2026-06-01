@@ -4,6 +4,7 @@ import CardDisciplina from '../components/CardDisciplina';
 import ModalDisciplina from '../components/ModalDisciplina';
 import ModalPendentes from '../components/ModalPendentes';
 import Rodape from '../components/Rodape';
+import PomodoroTimer from '../components/PomodoroTimer';
 import LogoSvg from '../assets/logo.svg';
 import './Painel.css';
 
@@ -117,51 +118,59 @@ export default function Painel() {
   return (
     <div className="painel-page">
       <div className="painel-inner">
-        <header className="painel-header">
-          <div className="painel-header-info">
-            <span className="painel-data">{dataFormatada()}</span>
-            <span className="painel-saudacao">Olá, {nomeUsuario()}</span>
-          </div>
-          <div className="painel-logo">
-            <img src={LogoSvg} alt="Planeja+" />
-          </div>
-        </header>
+        <div className="painel-coluna-principal">
+          <header className="painel-header">
+            <div className="painel-header-info">
+              <span className="painel-data">{dataFormatada()}</span>
+              <span className="painel-saudacao">Olá, {nomeUsuario()}</span>
+            </div>
+            <div className="painel-logo">
+              <img src={LogoSvg} alt="Planeja+" />
+            </div>
+          </header>
 
-        <div className="painel-section-header">
-          <span className="painel-section-titulo">Suas Disciplinas</span>
-          <span className="painel-section-count">
-            {disciplinas.length} {disciplinas.length === 1 ? 'disciplina' : 'disciplinas'}
-          </span>
+          <main className="painel-main">
+            <div className="painel-section-header">
+              <span className="painel-section-titulo">Suas Disciplinas</span>
+              <span className="painel-section-count">
+                {disciplinas.length} {disciplinas.length === 1 ? 'disciplina' : 'disciplinas'}
+              </span>
+            </div>
+
+            {carregando ? (
+              <div className="painel-loading">Carregando...</div>
+            ) : erro ? (
+              <div className="painel-erro">{erro}</div>
+            ) : (
+              <div className="painel-grid">
+                {disciplinas.length === 0 ? (
+                  <div className="painel-vazio">
+                    <div className="painel-vazio-icone">📚</div>
+                    <div className="painel-vazio-titulo">Nenhuma disciplina ainda</div>
+                    <div className="painel-vazio-desc">
+                      Toque no botão + para adicionar sua primeira disciplina
+                    </div>
+                  </div>
+                ) : (
+                  disciplinas.map((d, index) => (
+                    <CardDisciplina
+                      key={d.id}
+                      disciplina={d}
+                      index={index}
+                      onToggleTopico={handleToggleTopico}
+                      onAdicionarTopico={handleAbrirModalTopico}
+                      onRemoverDisciplina={handleRemoverDisciplina}
+                    />
+                  ))
+                )}
+              </div>
+            )}
+          </main>
         </div>
 
-        {carregando ? (
-          <div className="painel-loading">Carregando...</div>
-        ) : erro ? (
-          <div className="painel-erro">{erro}</div>
-        ) : (
-          <div className="painel-grid">
-            {disciplinas.length === 0 ? (
-              <div className="painel-vazio">
-                <div className="painel-vazio-icone">📚</div>
-                <div className="painel-vazio-titulo">Nenhuma disciplina ainda</div>
-                <div className="painel-vazio-desc">
-                  Toque no botão + para adicionar sua primeira disciplina
-                </div>
-              </div>
-            ) : (
-              disciplinas.map((d, index) => (
-                <CardDisciplina
-                  key={d.id}
-                  disciplina={d}
-                  index={index}
-                  onToggleTopico={handleToggleTopico}
-                  onAdicionarTopico={handleAbrirModalTopico}
-                  onRemoverDisciplina={handleRemoverDisciplina}
-                />
-              ))
-            )}
-          </div>
-        )}
+        <aside className="painel-sidebar">
+          <PomodoroTimer />
+        </aside>
       </div>
 
       <ModalDisciplina

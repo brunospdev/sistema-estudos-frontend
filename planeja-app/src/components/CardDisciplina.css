@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  width: 100%;
   transition: box-shadow 0.2s;
 }
 
@@ -146,9 +147,21 @@
 }
 
 .topico-add-icon {
-  font-size: 17px;
-  line-height: 1;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-gray-light);
+}
+
+.topico-add-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  fill: none;
 }
 
 .topico-add:hover .topico-add-icon {
@@ -172,4 +185,10 @@
 .card-remover:hover {
   color: var(--color-error-text, #CC0000);
   background-color: #FFEAEA;
+}
+
+@media (max-width: 600px) {
+  .card-disciplina {
+    width: 100%;
+  }
 }
