@@ -33,7 +33,7 @@ export default function Login() {
     try {
       const { data } = await api.post('/auth/login', { email, senha });
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify({ nome: data.nome, email: data.email }));
       navigate('/');
     } catch (err) {
       const msg = err.response?.data?.message || 'E-mail ou senha inválidos.';

@@ -98,8 +98,8 @@ O arquivo `src/services/api.js` configura o Axios com:
 
 ## Tecnologias
 
-- React 18
-- React Router DOM 6
+- React 19
+- React Router DOM 7
 - Axios
 - CSS puro (sem bibliotecas de UI)
 

@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import api from '../services/api';
 import './PomodoroTimer.css';
 
-const STORAGE_KEY = 'planeja-pomodoro-state';
+const TIMER_STORAGE_PREFIX = 'planeja-pomodoro-timer';
 const HEATMAP_DIAS = 84;
 
 const MODOS = {
@@ -43,11 +44,12 @@ function dataComOffset(offsetDias) {
   return data;
 }
 
-function carregarHeatmapInicial(salvoHeatmap) {
-  if (!salvoHeatmap || typeof salvoHeatmap !== 'object') return {};
-  return Object.entries(salvoHeatmap).reduce((acc, [data, valor]) => {
-    if (Number.isFinite(valor) && valor > 0) {
-      acc[data] = valor;
+function normalizarHeatmap(heatmap) {
+  if (!heatmap || typeof heatmap !== 'object') return {};
+  return Object.entries(heatmap).reduce((acc, [data, valor]) => {
+    const quantidade = Number(valor);
+    if (Number.isFinite(quantidade) && quantidade > 0) {
+      acc[data] = quantidade;
     }
     return acc;
   }, {});
@@ -75,25 +77,23 @@ function nivelHeatmap(quantidade) {
   return 0;
 }
 
-function carregarEstadoInicial() {
+function getUsuarioEmail() {
   try {
-    const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-    if (!salvo) return null;
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
+    return u.email || '';
+  } catch {
+    return '';
+  }
+}
 
-    const duracoesPersonalizadas = {
-      foco:
-        Number.isFinite(salvo.duracoesPersonalizadas?.foco) && salvo.duracoesPersonalizadas.foco > 0
-          ? salvo.duracoesPersonalizadas.foco
-          : DURACOES_PADRAO.foco,
-      curto:
-        Number.isFinite(salvo.duracoesPersonalizadas?.curto) && salvo.duracoesPersonalizadas.curto > 0
-          ? salvo.duracoesPersonalizadas.curto
-          : DURACOES_PADRAO.curto,
-      longo:
-        Number.isFinite(salvo.duracoesPersonalizadas?.longo) && salvo.duracoesPersonalizadas.longo > 0
-          ? salvo.duracoesPersonalizadas.longo
-          : DURACOES_PADRAO.longo,
-    };
+function getTimerStorageKey(email = getUsuarioEmail()) {
+  return email ? `${TIMER_STORAGE_PREFIX}-${email}` : `${TIMER_STORAGE_PREFIX}-anon`;
+}
+
+function carregarEstadoTimer(storageKey) {
+  try {
+    const salvo = JSON.parse(localStorage.getItem(storageKey) || 'null');
+    if (!salvo) return null;
 
     return {
       modo: MODOS[salvo.modo] ? salvo.modo : 'foco',
@@ -101,35 +101,67 @@ function carregarEstadoInicial() {
         Number.isFinite(salvo.segundosRestantes) && salvo.segundosRestantes > 0
           ? salvo.segundosRestantes
           : MODOS[salvo.modo] ? MODOS[salvo.modo].segundos : MODOS.foco.segundos,
-      rodando: Boolean(salvo.rodando),
-      ciclosConcluidos: Number.isFinite(salvo.ciclosConcluidos) ? salvo.ciclosConcluidos : 0,
+      rodando: false,
       mensagem: typeof salvo.mensagem === 'string' ? salvo.mensagem : 'Pronto para começar',
-      duracoesPersonalizadas,
-      heatmapEstudo: carregarHeatmapInicial(salvo.heatmapEstudo),
     };
   } catch {
     return null;
   }
 }
 
+function coletarHeatmapLocal() {
+  const dias = {};
+
+  for (let i = 0; i < localStorage.length; i += 1) {
+    const chave = localStorage.key(i);
+    if (!chave || !chave.startsWith('planeja-pomodoro')) continue;
+
+    try {
+      const salvo = JSON.parse(localStorage.getItem(chave) || 'null');
+      Object.assign(dias, normalizarHeatmap(salvo?.heatmapEstudo));
+    } catch {
+      /* ignora entradas inválidas */
+    }
+  }
+
+  return dias;
+}
+
+function normalizarDuracoes(duracoes) {
+  return {
+    foco:
+      Number.isFinite(duracoes?.foco) && duracoes.foco > 0
+        ? duracoes.foco
+        : DURACOES_PADRAO.foco,
+    curto:
+      Number.isFinite(duracoes?.curto) && duracoes.curto > 0
+        ? duracoes.curto
+        : DURACOES_PADRAO.curto,
+    longo:
+      Number.isFinite(duracoes?.longo) && duracoes.longo > 0
+        ? duracoes.longo
+        : DURACOES_PADRAO.longo,
+  };
+}
+
 export default function PomodoroTimer() {
-  const estadoInicial = useMemo(carregarEstadoInicial, []);
-  const [modo, setModo] = useState(estadoInicial?.modo || 'foco');
+  const storageKey = useMemo(() => getTimerStorageKey(), []);
+  const estadoTimer = useMemo(() => carregarEstadoTimer(storageKey), [storageKey]);
+  const sincronizadoRef = useRef(false);
+
+  const [modo, setModo] = useState(estadoTimer?.modo || 'foco');
   const [segundosRestantes, setSegundosRestantes] = useState(
-    estadoInicial?.segundosRestantes || MODOS.foco.segundos
+    estadoTimer?.segundosRestantes || MODOS.foco.segundos
   );
-  const [rodando, setRodando] = useState(estadoInicial?.rodando || false);
-  const [ciclosConcluidos, setCiclosConcluidos] = useState(estadoInicial?.ciclosConcluidos || 0);
-  const [mensagem, setMensagem] = useState(estadoInicial?.mensagem || 'Pronto para começar');
-  const [duracoesPersonalizadas, setDuracoesPersonalizadas] = useState(
-    estadoInicial?.duracoesPersonalizadas || DURACOES_PADRAO
-  );
-  const [formDuracoes, setFormDuracoes] = useState(
-    estadoInicial?.duracoesPersonalizadas || DURACOES_PADRAO
-  );
+  const [rodando, setRodando] = useState(false);
+  const [ciclosConcluidos, setCiclosConcluidos] = useState(0);
+  const [mensagem, setMensagem] = useState(estadoTimer?.mensagem || 'Pronto para começar');
+  const [duracoesPersonalizadas, setDuracoesPersonalizadas] = useState(DURACOES_PADRAO);
+  const [formDuracoes, setFormDuracoes] = useState(DURACOES_PADRAO);
   const [statusVisual, setStatusVisual] = useState('parado');
   const [finalizado, setFinalizado] = useState(false);
-  const [heatmapEstudo, setHeatmapEstudo] = useState(estadoInicial?.heatmapEstudo || {});
+  const [heatmapEstudo, setHeatmapEstudo] = useState({});
+  const [carregandoRemoto, setCarregandoRemoto] = useState(true);
 
   const corAtual = DURACOES_POR_TOM[statusVisual] || DURACOES_POR_TOM.parado;
   const heatmapDados = useMemo(() => prepararHeatmap(heatmapEstudo), [heatmapEstudo]);
@@ -142,24 +174,67 @@ export default function PomodoroTimer() {
   );
 
   useEffect(() => {
-    const dados = {
-      modo,
-      segundosRestantes,
-      rodando,
-      ciclosConcluidos,
-      mensagem,
-      duracoesPersonalizadas,
-      heatmapEstudo,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
-  }, [modo, segundosRestantes, rodando, ciclosConcluidos, mensagem, duracoesPersonalizadas, heatmapEstudo]);
+    const dados = { modo, segundosRestantes, mensagem };
+    localStorage.setItem(storageKey, JSON.stringify(dados));
+  }, [storageKey, modo, segundosRestantes, mensagem]);
 
-  function registrarDiaEstudado() {
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarRemoto() {
+      setCarregandoRemoto(true);
+      try {
+        const diasLocais = coletarHeatmapLocal();
+        if (Object.keys(diasLocais).length > 0 && !sincronizadoRef.current) {
+          await api.post('/estudo/heatmap/sync', { dias: diasLocais });
+          sincronizadoRef.current = true;
+        }
+
+        const { data } = await api.get('/estudo/pomodoro');
+        if (!ativo) return;
+
+        setHeatmapEstudo(normalizarHeatmap(data.heatmap));
+        setCiclosConcluidos(Number(data.ciclosConcluidos) || 0);
+
+        const duracoes = normalizarDuracoes(data.duracoes);
+        setDuracoesPersonalizadas(duracoes);
+        setFormDuracoes(duracoes);
+        if (!estadoTimer) {
+          setSegundosRestantes(duracoes.foco * 60);
+        }
+      } catch {
+        if (ativo) {
+          setHeatmapEstudo(normalizarHeatmap(coletarHeatmapLocal()));
+        }
+      } finally {
+        if (ativo) setCarregandoRemoto(false);
+      }
+    }
+
+    carregarRemoto();
+    return () => {
+      ativo = false;
+    };
+  }, [estadoTimer]);
+
+  async function registrarDiaEstudado() {
     const chaveHoje = chaveData();
     setHeatmapEstudo((atual) => ({
       ...atual,
       [chaveHoje]: (atual[chaveHoje] || 0) + 1,
     }));
+    setCiclosConcluidos((valor) => valor + 1);
+
+    try {
+      const { data } = await api.post('/estudo/sessao');
+      setHeatmapEstudo((atual) => ({
+        ...atual,
+        [data.data]: data.sessoes,
+      }));
+      setCiclosConcluidos(Number(data.ciclosConcluidos) || 0);
+    } catch {
+      /* mantém atualização otimista */
+    }
   }
 
   useEffect(() => {
@@ -183,7 +258,6 @@ export default function PomodoroTimer() {
       setSegundosRestantes((atual) => {
         if (atual <= 1) {
           if (modo === 'foco') {
-            setCiclosConcluidos((valor) => valor + 1);
             registrarDiaEstudado();
           }
 
@@ -199,7 +273,7 @@ export default function PomodoroTimer() {
     }, 1000);
 
     return () => window.clearInterval(intervalo);
-  }, [rodando, modo, ciclosConcluidos, getDuracaoModo]);
+  }, [rodando, modo, getDuracaoModo]);
 
   function selecionarModo(novoModo) {
     setModo(novoModo);
@@ -232,7 +306,7 @@ export default function PomodoroTimer() {
     setStatusVisual('parado');
   }
 
-  function aplicarPersonalizacao() {
+  async function aplicarPersonalizacao() {
     const normalizado = {
       foco: Math.max(1, Number(formDuracoes.foco) || DURACOES_PADRAO.foco),
       curto: Math.max(1, Number(formDuracoes.curto) || DURACOES_PADRAO.curto),
@@ -246,6 +320,17 @@ export default function PomodoroTimer() {
     setFinalizado(false);
     setStatusVisual('parado');
     setRodando(false);
+
+    try {
+      const { data } = await api.put('/estudo/pomodoro/config', normalizado);
+      const duracoes = normalizarDuracoes(data.duracoes);
+      setDuracoesPersonalizadas(duracoes);
+      setFormDuracoes(duracoes);
+      setHeatmapEstudo(normalizarHeatmap(data.heatmap));
+      setCiclosConcluidos(Number(data.ciclosConcluidos) || 0);
+    } catch {
+      setMensagem('Tempos aplicados localmente; falha ao sincronizar com a conta');
+    }
   }
 
   return (
@@ -253,7 +338,11 @@ export default function PomodoroTimer() {
       <div className="pomodoro-topo">
         <div>
           <div className="pomodoro-tag">Pomodoro</div>
-          <div className="pomodoro-dica">Foco por blocos curtos e pausas automáticas.</div>
+          <div className="pomodoro-dica">
+            {carregandoRemoto
+              ? 'Sincronizando histórico da sua conta...'
+              : 'Foco por blocos curtos e pausas automáticas.'}
+          </div>
         </div>
         <div className="pomodoro-status">
           <div>{rodando ? 'Executando' : 'Pausado'}</div>

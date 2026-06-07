@@ -32,7 +32,7 @@ Thumbs.db
 *.swo
 
 # Cache
-.eslintcach
+.eslintcache
 .cache/
 
 # Ignorar arquivos de configuração de ambiente
