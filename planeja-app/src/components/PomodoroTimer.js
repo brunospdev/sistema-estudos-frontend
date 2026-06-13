@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
 import './PomodoroTimer.css';
 
@@ -77,16 +77,12 @@ function nivelHeatmap(quantidade) {
   return 0;
 }
 
-function getUsuarioEmail() {
-  try {
-    const u = JSON.parse(localStorage.getItem('user') || '{}');
-    return u.email || '';
-  } catch {
-    return '';
-  }
+function getUsuarioEmail(propEmail) {
+  if (propEmail) return propEmail;
+  return '';
 }
 
-function getTimerStorageKey(email = getUsuarioEmail()) {
+function getTimerStorageKey(email = '') {
   return email ? `${TIMER_STORAGE_PREFIX}-${email}` : `${TIMER_STORAGE_PREFIX}-anon`;
 }
 
@@ -109,24 +105,6 @@ function carregarEstadoTimer(storageKey) {
   }
 }
 
-function coletarHeatmapLocal() {
-  const dias = {};
-
-  for (let i = 0; i < localStorage.length; i += 1) {
-    const chave = localStorage.key(i);
-    if (!chave || !chave.startsWith('planeja-pomodoro')) continue;
-
-    try {
-      const salvo = JSON.parse(localStorage.getItem(chave) || 'null');
-      Object.assign(dias, normalizarHeatmap(salvo?.heatmapEstudo));
-    } catch {
-      /* ignora entradas inválidas */
-    }
-  }
-
-  return dias;
-}
-
 function normalizarDuracoes(duracoes) {
   return {
     foco:
@@ -144,10 +122,9 @@ function normalizarDuracoes(duracoes) {
   };
 }
 
-export default function PomodoroTimer() {
-  const storageKey = useMemo(() => getTimerStorageKey(), []);
+export default function PomodoroTimer({ userEmail = '' }) {
+  const storageKey = useMemo(() => getTimerStorageKey(userEmail), [userEmail]);
   const estadoTimer = useMemo(() => carregarEstadoTimer(storageKey), [storageKey]);
-  const sincronizadoRef = useRef(false);
 
   const [modo, setModo] = useState(estadoTimer?.modo || 'foco');
   const [segundosRestantes, setSegundosRestantes] = useState(
@@ -184,12 +161,6 @@ export default function PomodoroTimer() {
     async function carregarRemoto() {
       setCarregandoRemoto(true);
       try {
-        const diasLocais = coletarHeatmapLocal();
-        if (Object.keys(diasLocais).length > 0 && !sincronizadoRef.current) {
-          await api.post('/estudo/heatmap/sync', { dias: diasLocais });
-          sincronizadoRef.current = true;
-        }
-
         const { data } = await api.get('/estudo/pomodoro');
         if (!ativo) return;
 
@@ -204,7 +175,7 @@ export default function PomodoroTimer() {
         }
       } catch {
         if (ativo) {
-          setHeatmapEstudo(normalizarHeatmap(coletarHeatmapLocal()));
+          setMensagem('Não foi possível carregar o histórico da conta.');
         }
       } finally {
         if (ativo) setCarregandoRemoto(false);

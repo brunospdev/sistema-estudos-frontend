@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../auth/AuthContext';
 import './Login.css';
 import LogoSvg from '../assets/logo.svg';
 
@@ -14,9 +15,9 @@ function Logo() {
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setSession } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [lembrar, setLembrar] = useState(false);
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
 
@@ -32,8 +33,7 @@ export default function Login() {
     setCarregando(true);
     try {
       const { data } = await api.post('/auth/login', { email, senha });
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify({ nome: data.nome, email: data.email }));
+      setSession(data);
       navigate('/');
     } catch (err) {
       const msg = err.response?.data?.message || 'E-mail ou senha inválidos.';
@@ -76,24 +76,6 @@ export default function Login() {
               onChange={(e) => setSenha(e.target.value)}
               autoComplete="current-password"
             />
-          </div>
-
-          <div className="login-options">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={lembrar}
-                onChange={(e) => setLembrar(e.target.checked)}
-              />
-              Lembrar de mim
-            </label>
-            <a
-              href="#esqueci"
-              className="link-esqueci"
-              onClick={(e) => { e.preventDefault(); alert('Funcionalidade em desenvolvimento'); }}
-            >
-              Esqueceu a senha?
-            </a>
           </div>
 
           {erro && <div className="login-erro">{erro}</div>}

@@ -1,24 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../auth/AuthContext';
 import LogoSvg from '../assets/logo.svg';
 import './Perfil.css';
 
-function dadosIniciais() {
-  try {
-    const u = JSON.parse(localStorage.getItem('user') || '{}');
-    return { nome: u.nome || u.name || '', email: u.email || '' };
-  } catch {
-    return { nome: '', email: '' };
-  }
-}
-
 export default function Perfil() {
   const navigate = useNavigate();
-  const inicial = dadosIniciais();
+  const { user, logout } = useAuth();
 
-  const [nome, setNome] = useState(inicial.nome);
-  const [email, setEmail] = useState(inicial.email);
+  const [nome, setNome] = useState(user?.nome || '');
+  const [email, setEmail] = useState(user?.email || '');
   const [notificacoes, setNotificacoes] = useState(true);
   const [carregando, setCarregando] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -27,19 +19,16 @@ export default function Perfil() {
     async function carregarPerfil() {
       try {
         const { data } = await api.get('/usuarios/perfil');
-        setNome(data.nome || data.name || '');
+        setNome(data.nome || '');
         setEmail(data.email || '');
-        setNotificacoes(data.notificacoes ?? true);
-        localStorage.setItem('user', JSON.stringify(data));
-      } catch { /* usa localStorage */ }
+      } catch { /* mantém dados do contexto */ }
     }
     carregarPerfil();
   }, []);
 
-  function handleSair() {
+  async function handleSair() {
     if (!window.confirm('Deseja mesmo sair da conta?')) return;
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    await logout();
     navigate('/login');
   }
 
@@ -48,8 +37,7 @@ export default function Perfil() {
     setFeedback(null);
     setCarregando(true);
     try {
-      const { data } = await api.put('/usuarios/perfil', { nome, email });
-      localStorage.setItem('user', JSON.stringify(data));
+      await api.put('/usuarios/perfil', { nome, email });
       setFeedback({ tipo: 'sucesso', msg: 'Perfil salvo com sucesso!' });
     } catch (err) {
       setFeedback({ tipo: 'erro', msg: err.response?.data?.message || 'Erro ao salvar.' });
@@ -58,12 +46,15 @@ export default function Perfil() {
     }
   }
 
-  function handleExcluir() {
+  async function handleExcluir() {
     if (!window.confirm('Tem certeza? Esta ação é irreversível.')) return;
-    api.delete('/usuarios/perfil').then(() => {
-      localStorage.clear();
+    try {
+      await api.delete('/usuarios/perfil');
+      await logout();
       navigate('/login');
-    });
+    } catch {
+      setFeedback({ tipo: 'erro', msg: 'Não foi possível excluir a conta.' });
+    }
   }
 
   return (

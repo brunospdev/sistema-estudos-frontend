@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../auth/AuthContext';
 import './Login.css';
 import LogoSvg from '../assets/logo.svg';
 
@@ -14,6 +15,7 @@ function Logo() {
 
 export default function Cadastro() {
   const navigate = useNavigate();
+  const { setSession } = useAuth();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -31,8 +33,9 @@ export default function Cadastro() {
 
     setCarregando(true);
     try {
-      await api.post('/auth/register', { nome, email, senha });
-      navigate('/login');
+      const { data } = await api.post('/auth/register', { nome, email, senha });
+      setSession(data);
+      navigate('/');
     } catch (err) {
       const msg = err.response?.data?.message || 'Erro ao criar conta. Tente novamente.';
       setErro(msg);
@@ -81,7 +84,7 @@ export default function Cadastro() {
             <input
               id="senha"
               type="password"
-              placeholder="••••••••"
+              placeholder="Mín. 8 caracteres, letra e número"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               autoComplete="new-password"
