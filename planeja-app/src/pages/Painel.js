@@ -242,19 +242,6 @@ export default function Painel() {
     } catch { /* silencioso */ }
   }
 
-  }
-
-  async function handleRecorrenciaRemover(disciplinaId, topicoId) {
-    try {
-      await api.delete(
-        `/disciplinas/${disciplinaId}/topicos/${topicoId}/recorrencia?escopo=FUTURAS`
-      );
-      await carregarDados();
-    } catch {
-      setErro('Não foi possível remover a recorrência.');
-    }
-  }
-
   async function handleRenameTopico(disciplinaId, topicoId, nome) {
     setDisciplinas((prev) => atualizarTopicoNaLista(prev, disciplinaId, topicoId, { nome }));
     try {
