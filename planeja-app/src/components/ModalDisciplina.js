@@ -5,7 +5,9 @@ import {
   isTipoComEntrega,
   isTipoEvento,
 } from '../constants/statusEstudo';
+import ModalRecorrencia, { RecorrenciaTrigger } from './ModalRecorrencia';
 import './ModalDisciplina.css';
+import './ModalRecorrencia.css';
 
 export default function ModalDisciplina({
   aberto,
@@ -22,6 +24,8 @@ export default function ModalDisciplina({
   const [notaMaxima, setNotaMaxima] = useState('');
   const [descricao, setDescricao] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const [recorrenciaConfig, setRecorrenciaConfig] = useState(null);
+  const [modalRecorrenciaAberto, setModalRecorrenciaAberto] = useState(false);
   const inputRef = useRef(null);
 
   const config = {
@@ -58,6 +62,8 @@ export default function ModalDisciplina({
   const mostrarDataEvento = isEvento;
   const mostrarNotaMax = mostrarTipo && isTipoComNota(tipo);
   const mostrarDescricao = mostrarTipo;
+  const dataReferencia = isEvento ? dataEntrega : dataProgramada;
+  const mostrarRecorrencia = mostrarProgramada || mostrarDataEvento;
 
   function labelDataEvento() {
     if (tipo === 'PROVA') return 'Data da prova';
@@ -74,6 +80,8 @@ export default function ModalDisciplina({
       setDataEntrega('');
       setNotaMaxima('');
       setDescricao('');
+      setRecorrenciaConfig(null);
+      setModalRecorrenciaAberto(false);
       setCarregando(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
@@ -93,6 +101,7 @@ export default function ModalDisciplina({
           dataEntrega: isEvento ? (dataEntrega || null) : null,
           notaMaxima: notaMaxima ? Number(notaMaxima) : null,
           descricao: descricao.trim() || null,
+          recorrencia: recorrenciaConfig,
         });
       } else {
         await onAdicionar(nomeTrimado);
@@ -127,6 +136,7 @@ export default function ModalDisciplina({
                   setTipo(e.target.value);
                   setDataProgramada('');
                   setDataEntrega('');
+                  setRecorrenciaConfig(null);
                 }}
               >
                 {Object.entries(TIPOS_ITEM).map(([valor, label]) => (
@@ -176,6 +186,11 @@ export default function ModalDisciplina({
             </div>
           )}
 
+          {mostrarRecorrencia && (
+            <RecorrenciaTrigger
+              recorrencia={recorrenciaConfig}
+              dataReferencia={dataReferencia}
+              onClick={() => setModalRecorrenciaAberto(true)}
             />
           )}
 
@@ -224,6 +239,15 @@ export default function ModalDisciplina({
         </form>
       </div>
 
+      <ModalRecorrencia
+        aberto={modalRecorrenciaAberto}
+        onFechar={() => setModalRecorrenciaAberto(false)}
+        dataReferencia={dataReferencia}
+        recorrenciaInicial={recorrenciaConfig}
+        titulo="Repetir item"
+        onConfirmar={(payload) => setRecorrenciaConfig(payload)}
+        onRemover={recorrenciaConfig ? () => setRecorrenciaConfig(null) : undefined}
+      />
     </div>
   );
 }

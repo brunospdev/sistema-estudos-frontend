@@ -242,6 +242,26 @@ export default function Painel() {
     } catch { /* silencioso */ }
   }
 
+  async function handleRecorrenciaChange(disciplinaId, topicoId, recorrencia) {
+    try {
+      await api.patch(`/disciplinas/${disciplinaId}/topicos/${topicoId}/recorrencia`, recorrencia);
+      await carregarDados();
+    } catch {
+      setErro('Não foi possível salvar a recorrência. Tente novamente.');
+    }
+  }
+
+  async function handleRecorrenciaRemover(disciplinaId, topicoId) {
+    try {
+      await api.delete(
+        `/disciplinas/${disciplinaId}/topicos/${topicoId}/recorrencia?escopo=FUTURAS`
+      );
+      await carregarDados();
+    } catch {
+      setErro('Não foi possível remover a recorrência.');
+    }
+  }
+
   async function handleRenameTopico(disciplinaId, topicoId, nome) {
     setDisciplinas((prev) => atualizarTopicoNaLista(prev, disciplinaId, topicoId, { nome }));
     try {
@@ -388,6 +408,8 @@ export default function Painel() {
                         corAccent="#027A8F"
                         onStatusChange={handleStatusChange}
                         onAgendaChange={handleAgendaChange}
+                        onRecorrenciaChange={handleRecorrenciaChange}
+                        onRecorrenciaRemover={handleRecorrenciaRemover}
                         onRename={handleRenameTopico}
                         onDelete={handleDeleteTopico}
                         onAvaliacaoChange={handleAvaliacaoChange}
@@ -434,6 +456,8 @@ export default function Painel() {
                       onRemoverDisciplina={handleRemoverDisciplina}
                       onStatusChange={handleStatusChange}
                       onAgendaChange={handleAgendaChange}
+                      onRecorrenciaChange={handleRecorrenciaChange}
+                      onRecorrenciaRemover={handleRecorrenciaRemover}
                       onRenameTopico={handleRenameTopico}
                       onDeleteTopico={handleDeleteTopico}
                       onAvaliacaoChange={handleAvaliacaoChange}

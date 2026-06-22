@@ -89,6 +89,8 @@ export default function CardDisciplina({
   onRemoverDisciplina,
   onStatusChange,
   onAgendaChange,
+  onRecorrenciaChange,
+  onRecorrenciaRemover,
   onRenameTopico,
   onDeleteTopico,
   onAvaliacaoChange,
@@ -114,6 +116,8 @@ export default function CardDisciplina({
   const handlers = {
     onStatusChange,
     onAgendaChange,
+    onRecorrenciaChange,
+    onRecorrenciaRemover,
     onRename: onRenameTopico,
     onDelete: onDeleteTopico,
     onAvaliacaoChange,
@@ -236,6 +240,8 @@ export default function CardDisciplina({
                   onAdicionarSubgrupo={onAdicionarSubgrupo}
                   onStatusChange={onStatusChange}
                   onAgendaChange={onAgendaChange}
+                  onRecorrenciaChange={onRecorrenciaChange}
+                  onRecorrenciaRemover={onRecorrenciaRemover}
                   onRenameTopico={onRenameTopico}
                   onDeleteTopico={onDeleteTopico}
                   onAvaliacaoChange={onAvaliacaoChange}
