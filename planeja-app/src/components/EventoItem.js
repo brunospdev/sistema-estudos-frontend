@@ -10,14 +10,19 @@ import {
   exigeNotaParaConcluir,
 } from '../constants/statusEstudo';
 import ListaDescricoes from './ListaDescricoes';
+import ModalRecorrencia, { RecorrenciaTrigger } from './ModalRecorrencia';
+import { temRecorrencia, resumirRecorrencia, recorrenciaFromApi } from '../constants/recorrencia';
 import './EventoItem.css';
 import './ListaDescricoes.css';
+import './ModalRecorrencia.css';
 
 export default function EventoItem({
   topico,
   disciplinaId,
   modo = 'ativo',
   onAgendaChange,
+  onRecorrenciaChange,
+  onRecorrenciaRemover,
   onRename,
   onDelete,
   onAvaliacaoChange,
@@ -30,6 +35,7 @@ export default function EventoItem({
   const [notaEdit, setNotaEdit] = useState(topico.nota ?? '');
   const [menuAberto, setMenuAberto] = useState(false);
   const [expandido, setExpandido] = useState(modo === 'ativo');
+  const [modalRecorrenciaAberto, setModalRecorrenciaAberto] = useState(false);
   const inputRef = useRef(null);
   const menuRef = useRef(null);
 
@@ -111,6 +117,11 @@ export default function EventoItem({
         >
           <span className="evento-tipo-badge">{TIPOS_ITEM[tipo] || tipo}</span>
           {concluido && <span className="evento-status-badge">Concluído</span>}
+          {temRecorrencia(topico) && (
+            <span className="recorrencia-badge" title={resumirRecorrencia(recorrenciaFromApi(topico.recorrencia, dataExibir))}>
+              ↻ Recorrente
+            </span>
+          )}
         </button>
 
         <div className="evento-item-titulo-wrap">
@@ -194,6 +205,13 @@ export default function EventoItem({
                 />
               </label>
 
+              <div className="evento-campo evento-campo-recorrencia">
+                <RecorrenciaTrigger
+                  recorrencia={topico.recorrencia}
+                  dataReferencia={dataExibir}
+                  onClick={() => setModalRecorrenciaAberto(true)}
+                />
+              </div>
 
               {comNota && (
                 <label className="evento-campo evento-campo-nota">
@@ -246,6 +264,15 @@ export default function EventoItem({
         onExcluir={(descricaoId) => onDescricaoExcluir?.(disciplinaId, topico.id, descricaoId)}
       />
 
+      <ModalRecorrencia
+        aberto={modalRecorrenciaAberto}
+        onFechar={() => setModalRecorrenciaAberto(false)}
+        dataReferencia={dataExibir}
+        recorrenciaInicial={topico.recorrencia}
+        titulo="Repetir evento"
+        onConfirmar={(payload) => onRecorrenciaChange?.(disciplinaId, topico.id, payload)}
+        onRemover={topico.recorrencia ? () => onRecorrenciaRemover?.(disciplinaId, topico.id) : undefined}
+      />
     </article>
   );
 }

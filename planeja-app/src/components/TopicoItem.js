@@ -10,8 +10,11 @@ import {
 } from '../constants/statusEstudo';
 import EventoItem from './EventoItem';
 import ListaDescricoes from './ListaDescricoes';
+import ModalRecorrencia from './ModalRecorrencia';
+import { temRecorrencia, resumirRecorrencia, recorrenciaFromApi } from '../constants/recorrencia';
 import './TopicoItem.css';
 import './ListaDescricoes.css';
+import './ModalRecorrencia.css';
 
 function TopicoItemInner({
   topico,
@@ -19,6 +22,8 @@ function TopicoItemInner({
   corAccent,
   onStatusChange,
   onAgendaChange,
+  onRecorrenciaChange,
+  onRecorrenciaRemover,
   onRename,
   onDelete,
   onDescricaoAdicionar,
@@ -30,6 +35,7 @@ function TopicoItemInner({
   const [editando, setEditando] = useState(false);
   const [nomeEdit, setNomeEdit] = useState(nomeTopico(topico));
   const [menuAberto, setMenuAberto] = useState(false);
+  const [modalRecorrenciaAberto, setModalRecorrenciaAberto] = useState(false);
   const inputRef = useRef(null);
   const menuRef = useRef(null);
 
@@ -139,6 +145,22 @@ function TopicoItemInner({
               title={topico.dataProgramada ? formatarDataISO(topico.dataProgramada) : 'Agendar'}
             />
 
+            <button
+              type="button"
+              className={`topico-recorrencia-btn${temRecorrencia(topico) ? ' ativo' : ''}`}
+              onClick={() => setModalRecorrenciaAberto(true)}
+              disabled={!topico.dataProgramada}
+              title={
+                topico.dataProgramada
+                  ? (temRecorrencia(topico)
+                    ? resumirRecorrencia(recorrenciaFromApi(topico.recorrencia, topico.dataProgramada))
+                    : 'Configurar repetição')
+                  : 'Informe uma data primeiro'
+              }
+              aria-label="Configurar repetição"
+            >
+              ↻
+            </button>
 
             {topico.horasAcumuladas > 0 && (
               <span className="topico-horas" title="Horas acumuladas">
@@ -188,6 +210,15 @@ function TopicoItemInner({
         />
       </article>
 
+      <ModalRecorrencia
+        aberto={modalRecorrenciaAberto}
+        onFechar={() => setModalRecorrenciaAberto(false)}
+        dataReferencia={topico.dataProgramada}
+        recorrenciaInicial={topico.recorrencia}
+        titulo="Repetir estudo"
+        onConfirmar={(payload) => onRecorrenciaChange?.(disciplinaId, topico.id, payload)}
+        onRemover={topico.recorrencia ? () => onRecorrenciaRemover?.(disciplinaId, topico.id) : undefined}
+      />
 
       {subEventos.map((sub) => (
         <div key={sub.id} style={nivel > 0 ? { marginLeft: `${(nivel + 1) * 16}px` } : { marginLeft: '16px' }}>
@@ -196,6 +227,8 @@ function TopicoItemInner({
             disciplinaId={disciplinaId}
             modo={sub.entregaConcluida ? 'historico' : 'ativo'}
             onAgendaChange={onAgendaChange}
+            onRecorrenciaChange={onRecorrenciaChange}
+            onRecorrenciaRemover={onRecorrenciaRemover}
             onRename={onRename}
             onDelete={onDelete}
             onDescricaoAdicionar={onDescricaoAdicionar}
@@ -214,6 +247,8 @@ function TopicoItemInner({
           corAccent={corAccent}
           onStatusChange={onStatusChange}
           onAgendaChange={onAgendaChange}
+          onRecorrenciaChange={onRecorrenciaChange}
+          onRecorrenciaRemover={onRecorrenciaRemover}
           onRename={onRename}
           onDelete={onDelete}
           onDescricaoAdicionar={onDescricaoAdicionar}
