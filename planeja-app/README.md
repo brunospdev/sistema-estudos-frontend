@@ -72,15 +72,17 @@ src/
 | `/`         | Painel     | Sim       |
 | `/perfil`   | Perfil     | Sim       |
 
-Rotas protegidas exigem `token` no `localStorage`. Sem token, o usuário é redirecionado para `/login`.
+Rotas protegidas usam `AuthProvider` — sessão restaurada via refresh cookie. Access token fica **apenas em memória** (não usa `localStorage`).
 
 ## Integração com a API
 
 O arquivo `src/services/api.js` configura o Axios com:
 
 - **baseURL**: valor de `REACT_APP_API_URL` (fallback: `http://localhost:8080/api`)
-- **Interceptor de request**: injeta `Authorization: Bearer <token>` em todas as requisições
-- **Interceptor de response**: limpa o `localStorage` e redireciona para `/login` em caso de `400` ou `401`
+- **withCredentials**: envia cookies de refresh automaticamente
+- **Header `X-StudyHub-Client`**: proteção anti-CSRF em refresh/logout
+- **Interceptor de request**: injeta `Authorization: Bearer` só em rotas autenticadas
+- **Interceptor de response**: tenta refresh em 401; redireciona para login se falhar
 
 ### Endpoints esperados
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
+import { useAuth } from '../auth/AuthContext';
 import CardDisciplina from '../components/CardDisciplina';
 import ModalDisciplina from '../components/ModalDisciplina';
 import ModalPendentes from '../components/ModalPendentes';
@@ -16,16 +17,12 @@ function dataFormatada() {
   return `${DIAS[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]}`;
 }
 
-function nomeUsuario() {
-  try {
-    const u = JSON.parse(localStorage.getItem('user') || '{}');
-    return u.nome || u.name || 'Estudante';
-  } catch {
-    return 'Estudante';
-  }
+function nomeUsuario(user) {
+  return user?.nome || 'Estudante';
 }
 
 export default function Painel() {
+  const { user } = useAuth();
   const [disciplinas, setDisciplinas] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
@@ -55,7 +52,7 @@ export default function Painel() {
       const { data } = await api.post('/disciplinas', { nome });
       setDisciplinas((prev) => [...prev, { ...data, topicos: data.topicos || [] }]);
     } catch {
-      setDisciplinas((prev) => [...prev, { id: Date.now(), nome, topicos: [] }]);
+      setErro('Não foi possível adicionar a disciplina. Tente novamente.');
     }
   }
 
@@ -100,13 +97,7 @@ export default function Painel() {
         )
       );
     } catch {
-      setDisciplinas((prev) =>
-        prev.map((d) =>
-          d.id === disciplinaId
-            ? { ...d, topicos: [...(d.topicos || []), { id: Date.now(), nome, concluido: false }] }
-            : d
-        )
-      );
+      setErro('Não foi possível adicionar o tópico. Tente novamente.');
     }
   }
 
@@ -122,7 +113,7 @@ export default function Painel() {
           <header className="painel-header">
             <div className="painel-header-info">
               <span className="painel-data">{dataFormatada()}</span>
-              <span className="painel-saudacao">Olá, {nomeUsuario()}</span>
+              <span className="painel-saudacao">Olá, {nomeUsuario(user)}</span>
             </div>
             <div className="painel-logo">
               <img src={LogoSvg} alt="Planeja+" />
@@ -169,7 +160,7 @@ export default function Painel() {
         </div>
 
         <aside className="painel-sidebar">
-          <PomodoroTimer />
+          <PomodoroTimer userEmail={user?.email} />
         </aside>
       </div>
 
