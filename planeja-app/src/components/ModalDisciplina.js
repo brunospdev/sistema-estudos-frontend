@@ -58,7 +58,6 @@ export default function ModalDisciplina({
   const mostrarDataEvento = isEvento;
   const mostrarNotaMax = mostrarTipo && isTipoComNota(tipo);
   const mostrarDescricao = mostrarTipo;
-  const dataReferencia = isEvento ? dataEntrega : dataProgramada;
 
   function labelDataEvento() {
     if (tipo === 'PROVA') return 'Data da prova';

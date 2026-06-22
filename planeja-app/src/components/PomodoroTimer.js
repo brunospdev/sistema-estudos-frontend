@@ -273,14 +273,14 @@ export default function PomodoroTimer({
     }
   }
 
-  function concluirCicloFoco() {
+  const concluirCicloFoco = useCallback(() => {
     setRodando(false);
     setFinalizado(true);
     setMensagem('Tempo concluído');
     setStatusVisual('concluido');
     setSessaoInicio(new Date(Date.now() - getDuracaoModo('foco') * 1000));
     setModalPosSessao(true);
-  }
+  }, [getDuracaoModo]);
 
   useEffect(() => {
     if (finalizado) {
@@ -318,7 +318,7 @@ export default function PomodoroTimer({
     }, 1000);
 
     return () => window.clearInterval(intervalo);
-  }, [rodando, modo, getDuracaoModo]);
+  }, [rodando, modo, concluirCicloFoco]);
 
   function selecionarModo(novoModo) {
     setModo(novoModo);
