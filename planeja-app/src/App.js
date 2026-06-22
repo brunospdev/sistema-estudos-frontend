@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import Painel from './pages/Painel';
 import Perfil from './pages/Perfil';
+import Calendario from './pages/Calendario';
+import Marcos from './pages/Marcos';
 import './App.css';
 
 function RotaProtegida({ children }) {
@@ -35,6 +37,22 @@ function AppRoutes() {
         element={
           <RotaProtegida>
             <Perfil />
+          </RotaProtegida>
+        }
+      />
+      <Route
+        path="/calendario"
+        element={
+          <RotaProtegida>
+            <Calendario />
+          </RotaProtegida>
+        }
+      />
+      <Route
+        path="/marcos"
+        element={
+          <RotaProtegida>
+            <Marcos />
           </RotaProtegida>
         }
       />

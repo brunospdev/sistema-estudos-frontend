@@ -1,4 +1,5 @@
 import React from 'react';
+import { STATUS_ESTUDO, normalizarStatus } from '../constants/statusEstudo';
 import './ModalPendentes.css';
 
 export default function ModalPendentes({ aberto, onFechar, disciplinas }) {
@@ -7,7 +8,7 @@ export default function ModalPendentes({ aberto, onFechar, disciplinas }) {
   const grupos = disciplinas
     .map((d) => ({
       nome: d.nome,
-      topicos: (d.topicos || []).filter((t) => !t.concluido),
+      topicos: (d.topicos || []).filter((t) => normalizarStatus(t) !== STATUS_ESTUDO.DOMINADO),
     }))
     .filter((g) => g.topicos.length > 0);
 

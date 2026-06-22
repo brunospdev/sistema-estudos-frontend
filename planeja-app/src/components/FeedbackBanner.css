@@ -1,0 +1,99 @@
+.feedback-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, rgba(2, 122, 143, 0.08), rgba(221, 250, 255, 0.6));
+  border: 1px solid rgba(2, 122, 143, 0.15);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.feedback-banner-conteudo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.feedback-banner-texto {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-main);
+}
+
+.feedback-banner-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-gray-dark);
+}
+
+.feedback-banner-barra {
+  display: inline-block;
+  width: 80px;
+  height: 6px;
+  background: #E0E0E0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.feedback-banner-barra-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.feedback-banner-streak {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-orange);
+}
+
+.feedback-banner-acoes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.feedback-banner-btn {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: background-color 0.2s;
+}
+
+.feedback-banner-btn:hover {
+  background: #025f70;
+}
+
+.feedback-banner-fechar {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--color-gray-light);
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.feedback-banner-fechar:hover {
+  color: var(--color-text-main);
+  background: rgba(0, 0, 0, 0.05);
+}

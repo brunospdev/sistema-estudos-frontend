@@ -1,0 +1,127 @@
+.modal-pos-sessao-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 46, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal-pos-sessao-box {
+  background: var(--color-white);
+  border-radius: 20px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.modal-pos-sessao-titulo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 6px;
+}
+
+.modal-pos-sessao-item {
+  font-size: 13px;
+  color: var(--color-gray-light);
+  margin-bottom: 20px;
+}
+
+.modal-pos-sessao-campo {
+  margin-bottom: 18px;
+}
+
+.modal-pos-sessao-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--color-gray-dark);
+  margin-bottom: 8px;
+}
+
+.modal-pos-sessao-dificuldades {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-pos-dif-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-white);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-family);
+  color: var(--color-text-main);
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.modal-pos-dif-btn:hover {
+  border-color: var(--color-primary);
+}
+
+.modal-pos-dif-btn.ativo {
+  border-color: var(--color-primary);
+  background: rgba(2, 122, 143, 0.08);
+  color: var(--color-primary);
+}
+
+.modal-pos-sessao-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: var(--font-family);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.modal-pos-sessao-textarea:focus {
+  border-color: var(--color-primary);
+}
+
+.modal-pos-sessao-acoes {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.modal-pos-btn-secundario {
+  padding: 10px 20px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-white);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-family);
+  color: var(--color-gray-dark);
+}
+
+.modal-pos-btn-principal {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-family);
+}
+
+.modal-pos-btn-principal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
