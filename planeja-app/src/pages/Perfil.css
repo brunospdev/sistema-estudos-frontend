@@ -284,3 +284,91 @@
 
 .perfil-feedback.sucesso { background: #E8F5E9; color: #2E7D32; }
 .perfil-feedback.erro { background: var(--color-error-bg); color: var(--color-error-text); }
+
+.perfil-prefs-form {
+  background: var(--color-white);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.perfil-prefs-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perfil-prefs-form .form-group label {
+  font-size: var(--font-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--color-gray-dark);
+}
+
+.perfil-prefs-form .form-group input,
+.perfil-prefs-form .form-group select {
+  height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  font-size: var(--font-base);
+  font-family: var(--font-family);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.perfil-prefs-form .form-group input:focus,
+.perfil-prefs-form .form-group select:focus {
+  border-color: var(--color-primary);
+}
+
+.perfil-prefs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.perfil-marco-principal {
+  font-size: var(--font-sm);
+  color: var(--color-gray-dark);
+  padding: 10px 12px;
+  background: rgba(2, 122, 143, 0.06);
+  border-radius: 8px;
+}
+
+.perfil-marco-label {
+  font-weight: var(--fw-bold);
+  margin-right: 6px;
+}
+
+.perfil-marco-dias {
+  color: var(--color-primary);
+  font-weight: var(--fw-semibold);
+  margin-left: 4px;
+}
+
+.btn-link-marcos {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  font-family: var(--font-family);
+  text-align: left;
+  padding: 0;
+}
+
+.btn-link-marcos:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .perfil-prefs-row {
+    grid-template-columns: 1fr;
+  }
+}

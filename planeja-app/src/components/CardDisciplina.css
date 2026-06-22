@@ -26,6 +26,24 @@
   margin-bottom: 14px;
 }
 
+.card-header.clicavel {
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-chevron {
+  font-size: 10px;
+  color: var(--color-gray-light);
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.card-topicos-vazio {
+  font-size: 13px;
+  color: var(--color-gray-light);
+  padding: 4px 0 8px;
+}
+
 .card-bullet {
   width: 11px;
   height: 11px;

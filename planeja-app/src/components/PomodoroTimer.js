@@ -1,5 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../services/api';
+import ModalPosSessao from './ModalPosSessao';
+import {
+  todasDisciplinasComTopicos,
+  flattenDisciplinas,
+  isTipoEstudavel,
+  nomeTopico,
+  TIPOS_ITEM,
+} from '../constants/statusEstudo';
 import './PomodoroTimer.css';
 
 const TIMER_STORAGE_PREFIX = 'planeja-pomodoro-timer';
@@ -77,11 +85,6 @@ function nivelHeatmap(quantidade) {
   return 0;
 }
 
-function getUsuarioEmail(propEmail) {
-  if (propEmail) return propEmail;
-  return '';
-}
-
 function getTimerStorageKey(email = '') {
   return email ? `${TIMER_STORAGE_PREFIX}-${email}` : `${TIMER_STORAGE_PREFIX}-anon`;
 }
@@ -122,7 +125,15 @@ function normalizarDuracoes(duracoes) {
   };
 }
 
-export default function PomodoroTimer({ userEmail = '' }) {
+export default function PomodoroTimer({
+  userEmail = '',
+  disciplinas = [],
+  itemSelecionado = null,
+  onItemChange,
+  metaDiaria = null,
+  streak = 0,
+  onSessaoSalva,
+}) {
   const storageKey = useMemo(() => getTimerStorageKey(userEmail), [userEmail]);
   const estadoTimer = useMemo(() => carregarEstadoTimer(storageKey), [storageKey]);
 
@@ -139,6 +150,10 @@ export default function PomodoroTimer({ userEmail = '' }) {
   const [finalizado, setFinalizado] = useState(false);
   const [heatmapEstudo, setHeatmapEstudo] = useState({});
   const [carregandoRemoto, setCarregandoRemoto] = useState(true);
+  const [modalPosSessao, setModalPosSessao] = useState(false);
+  const [sessaoInicio, setSessaoInicio] = useState(null);
+  const [disciplinaPicker, setDisciplinaPicker] = useState('');
+  const [topicoPicker, setTopicoPicker] = useState('');
 
   const corAtual = DURACOES_POR_TOM[statusVisual] || DURACOES_POR_TOM.parado;
   const heatmapDados = useMemo(() => prepararHeatmap(heatmapEstudo), [heatmapEstudo]);
@@ -149,6 +164,31 @@ export default function PomodoroTimer({ userEmail = '' }) {
     },
     [duracoesPersonalizadas]
   );
+
+  const disciplinasFlat = useMemo(() => flattenDisciplinas(disciplinas), [disciplinas]);
+
+  const topicosEstudaveis = useMemo(
+    () => todasDisciplinasComTopicos(disciplinas).filter((t) => isTipoEstudavel(t.tipo)),
+    [disciplinas]
+  );
+
+  const disciplinasComTopicos = useMemo(
+    () => disciplinasFlat.filter((d) =>
+      topicosEstudaveis.some((t) => t.disciplinaId === d.id)
+    ),
+    [disciplinasFlat, topicosEstudaveis]
+  );
+
+  const topicosDaDisciplina = useMemo(() => {
+    return topicosEstudaveis.filter((t) => String(t.disciplinaId) === String(disciplinaPicker));
+  }, [topicosEstudaveis, disciplinaPicker]);
+
+  useEffect(() => {
+    if (itemSelecionado?.disciplinaId) {
+      setDisciplinaPicker(String(itemSelecionado.disciplinaId));
+      setTopicoPicker(String(itemSelecionado.assuntoId || ''));
+    }
+  }, [itemSelecionado]);
 
   useEffect(() => {
     const dados = { modo, segundosRestantes, mensagem };
@@ -188,7 +228,27 @@ export default function PomodoroTimer({ userEmail = '' }) {
     };
   }, [estadoTimer]);
 
-  async function registrarDiaEstudado() {
+  const duracaoFocoMinutos = useMemo(
+    () => Math.round(getDuracaoModo('foco') / 60),
+    [getDuracaoModo]
+  );
+
+  async function registrarSessao(payloadExtra = {}) {
+    const fimEm = new Date();
+    const inicioEm = sessaoInicio || new Date(fimEm.getTime() - getDuracaoModo('foco') * 1000);
+    const assuntoId = topicoPicker ? Number(topicoPicker) : itemSelecionado?.assuntoId || null;
+    const disciplinaId = disciplinaPicker
+      ? Number(disciplinaPicker)
+      : itemSelecionado?.disciplinaId || null;
+
+    const body = {
+      assuntoId,
+      disciplinaId,
+      inicioEm: inicioEm.toISOString(),
+      fimEm: fimEm.toISOString(),
+      ...payloadExtra,
+    };
+
     const chaveHoje = chaveData();
     setHeatmapEstudo((atual) => ({
       ...atual,
@@ -197,15 +257,29 @@ export default function PomodoroTimer({ userEmail = '' }) {
     setCiclosConcluidos((valor) => valor + 1);
 
     try {
-      const { data } = await api.post('/estudo/sessao');
-      setHeatmapEstudo((atual) => ({
-        ...atual,
-        [data.data]: data.sessoes,
-      }));
-      setCiclosConcluidos(Number(data.ciclosConcluidos) || 0);
+      const { data } = await api.post('/estudo/sessao', body);
+      if (data?.data) {
+        setHeatmapEstudo((atual) => ({
+          ...atual,
+          [data.data]: data.sessoes,
+        }));
+      }
+      if (data?.ciclosConcluidos != null) {
+        setCiclosConcluidos(Number(data.ciclosConcluidos));
+      }
+      onSessaoSalva?.();
     } catch {
       /* mantém atualização otimista */
     }
+  }
+
+  function concluirCicloFoco() {
+    setRodando(false);
+    setFinalizado(true);
+    setMensagem('Tempo concluído');
+    setStatusVisual('concluido');
+    setSessaoInicio(new Date(Date.now() - getDuracaoModo('foco') * 1000));
+    setModalPosSessao(true);
   }
 
   useEffect(() => {
@@ -229,13 +303,13 @@ export default function PomodoroTimer({ userEmail = '' }) {
       setSegundosRestantes((atual) => {
         if (atual <= 1) {
           if (modo === 'foco') {
-            registrarDiaEstudado();
+            concluirCicloFoco();
+          } else {
+            setRodando(false);
+            setFinalizado(true);
+            setMensagem('Tempo concluído');
+            setStatusVisual('concluido');
           }
-
-          setRodando(false);
-          setFinalizado(true);
-          setMensagem('Tempo concluído');
-          setStatusVisual('concluido');
           return 0;
         }
 
@@ -256,10 +330,14 @@ export default function PomodoroTimer({ userEmail = '' }) {
   }
 
   function alternarExecucao() {
+    if (!rodando && modo === 'foco' && !finalizado) {
+      setSessaoInicio(new Date());
+    }
     setRodando((valor) => {
       const novoValor = !valor;
       if (novoValor && finalizado) {
         setSegundosRestantes(getDuracaoModo(modo));
+        setSessaoInicio(new Date());
       }
       if (novoValor) setFinalizado(false);
       setStatusVisual(novoValor ? MODOS[modo]?.tom || 'parado' : 'parado');
@@ -275,6 +353,7 @@ export default function PomodoroTimer({ userEmail = '' }) {
     setSegundosRestantes(getDuracaoModo('foco'));
     setMensagem('Pronto para começar');
     setStatusVisual('parado');
+    setSessaoInicio(null);
   }
 
   async function aplicarPersonalizacao() {
@@ -304,138 +383,241 @@ export default function PomodoroTimer({ userEmail = '' }) {
     }
   }
 
+  function handleDisciplinaChange(e) {
+    setDisciplinaPicker(e.target.value);
+    setTopicoPicker('');
+    onItemChange?.(null);
+  }
+
+  function handleTopicoChange(e) {
+    const topicoId = e.target.value;
+    setTopicoPicker(topicoId);
+    const topico = topicosEstudaveis.find((t) => String(t.id) === topicoId);
+    if (topico) {
+      onItemChange?.({
+        assuntoId: topico.id,
+        disciplinaId: topico.disciplinaId,
+        nome: nomeTopico(topico),
+        disciplinaNome: topico.disciplinaNome,
+      });
+    }
+  }
+
+  const itemModal = useMemo(() => {
+    if (itemSelecionado) return itemSelecionado;
+    const topico = topicosEstudaveis.find((t) => String(t.id) === topicoPicker);
+    if (topico) {
+      return {
+        assuntoId: topico.id,
+        disciplinaId: topico.disciplinaId,
+        nome: nomeTopico(topico),
+        disciplinaNome: topico.disciplinaNome,
+      };
+    }
+    return null;
+  }, [itemSelecionado, topicosEstudaveis, topicoPicker]);
+
+  async function fecharModalPosSessao() {
+    setModalPosSessao(false);
+    setSegundosRestantes(getDuracaoModo(modo));
+    setFinalizado(false);
+    setMensagem('Pronto para o próximo ciclo');
+    setStatusVisual('parado');
+  }
+
   return (
-    <section className={`pomodoro-card pomodoro-${statusVisual}`} aria-label="Cronômetro pomodoro">
-      <div className="pomodoro-topo">
-        <div>
-          <div className="pomodoro-tag">Pomodoro</div>
-          <div className="pomodoro-dica">
-            {carregandoRemoto
-              ? 'Sincronizando histórico da sua conta...'
-              : 'Foco por blocos curtos e pausas automáticas.'}
-          </div>
-        </div>
-        <div className="pomodoro-status">
-          <div>{rodando ? 'Executando' : 'Pausado'}</div>
-          <div>{ciclosConcluidos} foco{ciclosConcluidos === 1 ? '' : 's'} concluído{ciclosConcluidos === 1 ? '' : 's'}</div>
-        </div>
-      </div>
-
-      <div className="pomodoro-conteudo">
-        <div className="pomodoro-relogio">
+    <>
+      <section className={`pomodoro-card pomodoro-${statusVisual}`} aria-label="Cronômetro pomodoro">
+        <div className="pomodoro-topo">
           <div>
-            <div className="pomodoro-tempo" style={{ color: corAtual }}>{formatarTempo(segundosRestantes)}</div>
-            <div className="pomodoro-subtitulo">{MODOS[modo].label}</div>
-            <div className="pomodoro-minutos">{Math.ceil(segundosRestantes / 60)} minuto{Math.ceil(segundosRestantes / 60) === 1 ? '' : 's'} restantes</div>
+            <div className="pomodoro-tag">Pomodoro</div>
+            <div className="pomodoro-dica">
+              {carregandoRemoto
+                ? 'Sincronizando histórico da sua conta...'
+                : 'Foco por blocos curtos e pausas automáticas.'}
+            </div>
+          </div>
+          <div className="pomodoro-status">
+            <div>{rodando ? 'Executando' : 'Pausado'}</div>
+            <div>{ciclosConcluidos} foco{ciclosConcluidos === 1 ? '' : 's'} concluído{ciclosConcluidos === 1 ? '' : 's'}</div>
           </div>
         </div>
 
-        <div className="pomodoro-info">
-          <div className="pomodoro-modo" role="tablist" aria-label="Modos do pomodoro">
-            {Object.entries(MODOS).map(([chave, valor]) => (
-              <button
-                key={chave}
-                type="button"
-                className={`pomodoro-modo-btn ${modo === chave ? 'ativo' : ''}`}
-                onClick={() => selecionarModo(chave)}
-              >
-                {valor.label}
-              </button>
-            ))}
+        <div className="pomodoro-picker">
+          <label className="pomodoro-picker-campo">
+            <span>Matéria</span>
+            <select value={disciplinaPicker} onChange={handleDisciplinaChange} disabled={rodando}>
+              <option value="">Sessão livre</option>
+              {disciplinasComTopicos.map((d) => (
+                <option key={d.id} value={d.id}>{d.nome}</option>
+              ))}
+            </select>
+          </label>
+          {disciplinaPicker && (
+            <label className="pomodoro-picker-campo">
+              <span>Tópico</span>
+              <select value={topicoPicker} onChange={handleTopicoChange} disabled={rodando}>
+                <option value="">Selecione...</option>
+                {topicosDaDisciplina.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {nomeTopico(t)}{t.tipo && t.tipo !== 'CONTEUDO' ? ` (${TIPOS_ITEM[t.tipo] || t.tipo})` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
+
+        {(metaDiaria || streak > 0) && (
+          <div className="pomodoro-meta-streak">
+            {metaDiaria && (
+              <div className="pomodoro-meta">
+                Meta hoje: {metaDiaria.realizadoMinutos}/{metaDiaria.metaMinutos} min
+                <span className="pomodoro-meta-barra">
+                  <span
+                    className="pomodoro-meta-fill"
+                    style={{ width: `${Math.min(100, metaDiaria.percentual || 0)}%` }}
+                  />
+                </span>
+              </div>
+            )}
+            {streak > 0 && (
+              <div className="pomodoro-streak">{streak} dia{streak === 1 ? '' : 's'} seguidos</div>
+            )}
+          </div>
+        )}
+
+        <div className="pomodoro-conteudo">
+          <div className="pomodoro-relogio">
+            <div>
+              <div className="pomodoro-tempo" style={{ color: corAtual }}>{formatarTempo(segundosRestantes)}</div>
+              <div className="pomodoro-subtitulo">{MODOS[modo].label}</div>
+              <div className="pomodoro-minutos">{Math.ceil(segundosRestantes / 60)} minuto{Math.ceil(segundosRestantes / 60) === 1 ? '' : 's'} restantes</div>
+            </div>
           </div>
 
-          <div className="pomodoro-personalizacao">
-            <div className="pomodoro-personalizacao-titulo">Tempos personalizados</div>
-            <div className="pomodoro-campos">
-              <label className="pomodoro-campo">
-                <span>Foco (min)</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={formDuracoes.foco}
-                  onChange={(e) =>
-                    setFormDuracoes((prev) => ({ ...prev, foco: e.target.value }))
-                  }
-                />
-              </label>
-              <label className="pomodoro-campo">
-                <span>Pausa curta</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={formDuracoes.curto}
-                  onChange={(e) =>
-                    setFormDuracoes((prev) => ({ ...prev, curto: e.target.value }))
-                  }
-                />
-              </label>
-              <label className="pomodoro-campo">
-                <span>Pausa longa</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={formDuracoes.longo}
-                  onChange={(e) =>
-                    setFormDuracoes((prev) => ({ ...prev, longo: e.target.value }))
-                  }
-                />
-              </label>
+          <div className="pomodoro-info">
+            <div className="pomodoro-modo" role="tablist" aria-label="Modos do pomodoro">
+              {Object.entries(MODOS).map(([chave, valor]) => (
+                <button
+                  key={chave}
+                  type="button"
+                  className={`pomodoro-modo-btn ${modo === chave ? 'ativo' : ''}`}
+                  onClick={() => selecionarModo(chave)}
+                >
+                  {valor.label}
+                </button>
+              ))}
             </div>
 
-            <button type="button" className="pomodoro-aplicar" onClick={aplicarPersonalizacao}>
-              Aplicar tempos
-            </button>
+            <div className="pomodoro-personalizacao">
+              <div className="pomodoro-personalizacao-titulo">Tempos personalizados</div>
+              <div className="pomodoro-campos">
+                <label className="pomodoro-campo">
+                  <span>Foco (min)</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={formDuracoes.foco}
+                    onChange={(e) =>
+                      setFormDuracoes((prev) => ({ ...prev, foco: e.target.value }))
+                    }
+                  />
+                </label>
+                <label className="pomodoro-campo">
+                  <span>Pausa curta</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={formDuracoes.curto}
+                    onChange={(e) =>
+                      setFormDuracoes((prev) => ({ ...prev, curto: e.target.value }))
+                    }
+                  />
+                </label>
+                <label className="pomodoro-campo">
+                  <span>Pausa longa</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={formDuracoes.longo}
+                    onChange={(e) =>
+                      setFormDuracoes((prev) => ({ ...prev, longo: e.target.value }))
+                    }
+                  />
+                </label>
+              </div>
+
+              <button type="button" className="pomodoro-aplicar" onClick={aplicarPersonalizacao}>
+                Aplicar tempos
+              </button>
+            </div>
+
+            <div className="pomodoro-acoes">
+              <button
+                type="button"
+                className="pomodoro-acao pomodoro-acao-principal"
+                onClick={alternarExecucao}
+              >
+                {rodando ? 'Pausar' : 'Iniciar'}
+              </button>
+              <button
+                type="button"
+                className="pomodoro-acao pomodoro-acao-secundaria"
+                onClick={reiniciar}
+              >
+                Reiniciar
+              </button>
+            </div>
+
+            <div className="pomodoro-dica" style={{ color: corAtual }}>{mensagem}</div>
+          </div>
+        </div>
+
+        <div className="pomodoro-heatmap">
+          <div className="pomodoro-heatmap-topo">
+            <div className="pomodoro-heatmap-titulo">Heatmap de estudo</div>
+            <div className="pomodoro-heatmap-legenda">
+              <span>Menos</span>
+              <span className="heatmap-legenda-swatch nivel-0" />
+              <span className="heatmap-legenda-swatch nivel-1" />
+              <span className="heatmap-legenda-swatch nivel-2" />
+              <span className="heatmap-legenda-swatch nivel-3" />
+              <span className="heatmap-legenda-swatch nivel-4" />
+              <span>Mais</span>
+            </div>
           </div>
 
-          <div className="pomodoro-acoes">
-            <button
-              type="button"
-              className="pomodoro-acao pomodoro-acao-principal"
-              onClick={alternarExecucao}
-            >
-              {rodando ? 'Pausar' : 'Iniciar'}
-            </button>
-            <button
-              type="button"
-              className="pomodoro-acao pomodoro-acao-secundaria"
-              onClick={reiniciar}
-            >
-              Reiniciar
-            </button>
-          </div>
-
-          <div className="pomodoro-dica" style={{ color: corAtual }}>{mensagem}</div>
-        </div>
-      </div>
-
-      <div className="pomodoro-heatmap">
-        <div className="pomodoro-heatmap-topo">
-          <div className="pomodoro-heatmap-titulo">Heatmap de estudo</div>
-          <div className="pomodoro-heatmap-legenda">
-            <span>Menos</span>
-            <span className="heatmap-legenda-swatch nivel-0" />
-            <span className="heatmap-legenda-swatch nivel-1" />
-            <span className="heatmap-legenda-swatch nivel-2" />
-            <span className="heatmap-legenda-swatch nivel-3" />
-            <span className="heatmap-legenda-swatch nivel-4" />
-            <span>Mais</span>
+          <div className="pomodoro-heatmap-grid" aria-label="Dias de estudo dos últimos 84 dias">
+            {heatmapDados.map((dia) => {
+              const nivel = nivelHeatmap(dia.quantidade);
+              return (
+                <span
+                  key={dia.chave}
+                  className={`heatmap-cell nivel-${nivel}`}
+                  title={dia.titulo}
+                  aria-label={dia.titulo}
+                />
+              );
+            })}
           </div>
         </div>
+      </section>
 
-        <div className="pomodoro-heatmap-grid" aria-label="Dias de estudo dos últimos 84 dias">
-          {heatmapDados.map((dia) => {
-            const nivel = nivelHeatmap(dia.quantidade);
-            return (
-              <span
-                key={dia.chave}
-                className={`heatmap-cell nivel-${nivel}`}
-                title={dia.titulo}
-                aria-label={dia.titulo}
-              />
-            );
-          })}
-        </div>
-      </div>
-    </section>
+      <ModalPosSessao
+        aberto={modalPosSessao}
+        duracaoMinutos={duracaoFocoMinutos}
+        itemSelecionado={itemModal}
+        onFechar={fecharModalPosSessao}
+        onSalvar={async (payload) => {
+          await registrarSessao(payload);
+          await fecharModalPosSessao();
+        }}
+        onPular={async () => {
+          await registrarSessao({});
+          await fecharModalPosSessao();
+        }}
+      />
+    </>
   );
 }

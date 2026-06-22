@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Rodape.css';
 
-export default function Rodape({ pendentes, onNovaDisciplina, onVerPendentes }) {
+export default function Rodape({ pendentes, onNovaDisciplina, onVerPendentes, onVerHistorico }) {
   const navigate = useNavigate();
 
   return (
@@ -17,6 +17,24 @@ export default function Rodape({ pendentes, onNovaDisciplina, onVerPendentes }) 
       )}
 
       <div className="pill-acoes">
+        <button
+          type="button"
+          className="pill-btn"
+          onClick={onVerHistorico}
+          aria-label="Histórico de eventos"
+          title="Histórico de eventos"
+        >
+          📋
+        </button>
+        <button
+          type="button"
+          className="pill-btn"
+          onClick={() => navigate('/calendario')}
+          aria-label="Calendário"
+          title="Calendário"
+        >
+          📅
+        </button>
         <button
           className="pill-btn-mais"
           onClick={onNovaDisciplina}
